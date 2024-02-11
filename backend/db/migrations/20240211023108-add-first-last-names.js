@@ -11,17 +11,21 @@ module.exports = {
       type: Sequelize.STRING,
       allowNull: false,
       defaultValue: '' // You can set any default value you prefer
-    });
+    },
+    options
+    );
 
     await queryInterface.addColumn('Users', 'lastName', {
       type: Sequelize.STRING,
       allowNull: false,
       defaultValue: ''
-    });
+    },
+    options
+    );
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('Users', 'firstName');
-    await queryInterface.removeColumn('Users', 'lastName');
+    await queryInterface.removeColumn('Users', 'firstName', options);
+    await queryInterface.removeColumn('Users', 'lastName', options);
   }
 };
