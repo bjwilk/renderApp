@@ -10,17 +10,19 @@ module.exports = {
     await queryInterface.addColumn('Users', 'firstName', {
       type: Sequelize.STRING,
       allowNull: false,
-      defaultValue: '' // You can set any default value you prefer
+      defaultValue: '', // You can set any default value you prefer
+      ...options
     },
-    options
+    
     );
 
     await queryInterface.addColumn('Users', 'lastName', {
       type: Sequelize.STRING,
       allowNull: false,
-      defaultValue: ''
+      defaultValue: '',
+      ...options
     },
-    options
+    
     );
   },
 
