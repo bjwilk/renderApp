@@ -56,4 +56,6 @@ router.post(
     }
   );
 
+  router.get('/')
+
 module.exports = router;
