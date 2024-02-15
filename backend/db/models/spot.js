@@ -4,28 +4,83 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Spot extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      Spot.hasMany(models.SpotImage, {
+        foreignKey: 'spotId'
+       });
+ 
+       Spot.belongsToMany(models.User, {
+         through: {
+           model: 'Booking',
+           foreignKey: 'spotId',
+           otherKey: 'userId'
+         }
+       });
+
+       Spot.belongsToMany(models.User, {
+        through: {
+          model: 'Review',
+          foreignKey: 'spotId',
+          otherKey: 'userId'
+        }
+      });
     }
   }
   Spot.init({
-    ownerId: DataTypes.INTEGER,
-    address: DataTypes.STRING,
-    city: DataTypes.STRING,
-    state: DataTypes.STRING,
-    county: DataTypes.STRING,
-    lat: DataTypes.REAL,
-    lng: DataTypes.REAL,
-    name: DataTypes.STRING,
-    description: DataTypes.STRING,
-    price: DataTypes.INTEGER,
-    avgRating: DataTypes.STRING,
-    previewImage: DataTypes.STRING
+    ownerId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    county: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lat: {
+      type: DataTypes.REAL,
+      allowNull: false,
+      validate: {
+        min: -90,
+        max: 90
+      }
+    },
+    lng: {
+      type: DataTypes.REAL,
+      allowNull: false,
+      validate: {
+        min: -180,
+        max: 180
+      }
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [1,50]
+      }
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    price: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        min: 0
+      }
+    },
   }, {
     sequelize,
     modelName: 'Spot',

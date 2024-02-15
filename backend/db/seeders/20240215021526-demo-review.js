@@ -9,23 +9,32 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-    */
+    const reviewsData = [
+      {
+        userId: 1,
+        spotId: 3,
+        review: 'Great spot with amazing views!',
+        stars: 5,
+      },
+      {
+        userId: 2,
+        spotId: 1,
+        review: 'Nice location, friendly atmosphere.',
+        stars: 4,
+      },
+      {
+        userId: 3,
+        spotId: 2,
+        review: 'Cozy spot, perfect for a weekend getaway.',
+        stars: 4,
+      },
+    ];
+
+    return queryInterface.bulkInsert('Reviews', reviewsData, {});
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
+    return queryInterface.bulkDelete('Reviews', null, {});
+
   }
 };
