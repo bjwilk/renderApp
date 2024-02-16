@@ -1,7 +1,9 @@
 'use strict';
+
 const {
   Model
 } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Spot extends Model {
     static associate(models) {
@@ -24,6 +26,12 @@ module.exports = (sequelize, DataTypes) => {
           otherKey: 'userId'
         }
       });
+
+
+      Spot.belongsTo(models.User, {
+        foreignKey: 'ownerId',
+        as:'Owner'
+      })
     }
   }
   Spot.init({
@@ -43,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    county: {
+    country: {
       type: DataTypes.STRING,
       allowNull: false,
     },

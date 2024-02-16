@@ -10,7 +10,9 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Review.hasMany(models.ReviewImage, {
+        foreignKey: 'reviewId'
+      })
     }
   }
   Review.init({
@@ -22,8 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    review: DataTypes.STRING,
-    allowNull: false,
+    review: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     stars: {
       type: DataTypes.INTEGER,
       allowNull: false,

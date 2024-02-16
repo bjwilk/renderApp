@@ -11,16 +11,19 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     const spotImagesData = [
       {
+        id: 1,
         spotId: 1,
         url: 'image_url_1.jpg',
         preview: true,
       },
       {
+        id: 2,
         spotId: 2,
         url: 'image_url_2.jpg',
         preview: false,
       },
       {
+        id: 3,
         spotId: 3,
         url: 'image_url_3.jpg',
         preview: true,

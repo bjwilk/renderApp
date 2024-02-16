@@ -3,7 +3,7 @@ const express = require('express');
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-const { requireAuth } = require('../../utils/auth');
+const { requireAuth, setTokenCookie } = require('../../utils/auth');
 const { User, Spot, SpotImage } = require('../../db/models');
 
 const { handleValidationErrors } = require('../../utils/validation');
@@ -22,16 +22,14 @@ const router = express.Router();
 // Delete a spot
 
 // Get all spots for current user
-router.get('/user/:userId', requireAuth, async(req,res,next) => {
+router.get('/user', requireAuth, async(req,res,next) => {
     const usersSpots = await Spot.findAll({
         where: {
-            ownerId: req.params.userId
+            ownerId: req.user.id
         },
     });
 
-    if(req.params.userId !== req.user.id){
-        throw new Error('Must be signed in to access')
-    }
+   
 
     return res.json(usersSpots)
 });
@@ -55,7 +53,7 @@ router.get('/:spotId', async (req, res, next) => {
         });
 
         if (!spotInfo) {
-            return res.json({
+            return res.status(404).json({
                 message: 'Spot could not be found'
             });
         }
@@ -103,6 +101,7 @@ router.post('/', requireAuth, [
 
     try {
         const newSpot = await Spot.create({
+            ownerId: req.user.id,
             address,
             city,
             state,
@@ -140,7 +139,7 @@ router.post('/images/:spotId', requireAuth, async (req, res) => {
         const newImage = await SpotImage.create({
             url,
             preview,
-            spotId: spot.id
+            spotId: req.params.spotId
         });
 
         return res.status(201).json(newImage);
@@ -185,7 +184,8 @@ router.put('/:spotId', requireAuth, [
                     return acc;
                 }, {})
             });
-        }
+        };
+
 
         // Update the spot
         await spot.update({
@@ -200,10 +200,8 @@ router.put('/:spotId', requireAuth, [
             price
         });
 
-        // Fetch the updated spot
-        const updatedSpot = await Spot.findByPk(spotId);
 
-        return res.status(200).json(updatedSpot);
+        return res.status(200).json(spot);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Could not update the spot' });

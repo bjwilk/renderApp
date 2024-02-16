@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
           model: 'Review',
           foreignKey: 'userId',
           otherKey: 'spotId'
-        }
+        },
+        as: 'ReviewdSpots'
       })
     }
   };
