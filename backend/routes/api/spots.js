@@ -12,15 +12,6 @@ const { body, validationResult } = require('express-validator');
 
 const router = express.Router();
 
-// Get all spots by State
-// Get spot by name
-// Get all spots by price range
-// Get all spots where stars ===...
-
-
-// Update a spot
-// Delete a spot
-
 // Get all spots for current user
 router.get('/user', requireAuth, async(req,res,next) => {
     const usersSpots = await Spot.findAll({
