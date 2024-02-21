@@ -112,7 +112,7 @@ router.post('/', requireAuth, [
 });
 
 // POST route to create a new image for a spot
-router.post('/images/:spotId', requireAuth, async (req, res) => {
+router.post('/:spotId/images', requireAuth, async (req, res) => {
     const { spotId } = req.params;
     const { url, preview } = req.body;
 
@@ -213,17 +213,24 @@ router.delete('/:spotId', requireAuth, async (req, res) => {
             });
         }
 
-        // Delete the spot
-        await spot.destroy();
-
-        return res.status(200).json({
-            message: "Successfully deleted"
-        });
+        // Check ownership and delete the spot
+        if (spot.ownerId === req.user.id) {
+            // User is the owner, proceed with deletion
+            await spot.destroy();
+            return res.status(200).json({
+                message: "Successfully deleted"
+            });
+        } else {
+            return res.status(403).json({
+                message: "Permission denied, must be owner to delete"
+            });
+        }
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Could not delete the spot' });
     }
 });
+
 
 module.exports = router;
 
