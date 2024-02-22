@@ -13,17 +13,51 @@ const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
 // Get all spots for current user
-router.get('/user', requireAuth, async(req,res,next) => {
-    const usersSpots = await Spot.findAll({
-        where: {
-            ownerId: req.user.id
-        },
-    });
+router.get('/user/:userId', requireAuth, async (req, res, next) => {
+    try {
+        // Fetch Spot data from the database
+        const spots = await Spot.findAll({
+            where: {
+                ownerId: req.params.userId
+            }
+        });
 
-   
+        // Format the response as desired
+        const formattedResponse = {
+            Spots: spots.map((spot) => {
+                console.log('spots:', spots)
+                const previewImage = spot.SpotImages && spot.SpotImages.url === true
+                    ? spot.SpotImages.url
+                    : null;
 
-    return res.json(usersSpots)
+                return {
+                    id: spot.id,
+                    ownerId: spot.ownerId,
+                    address: spot.address,
+                    city: spot.city,
+                    state: spot.state,
+                    country: spot.country,
+                    lat: spot.lat,
+                    lng: spot.lng,
+                    name: spot.name,
+                    description: spot.description,
+                    price: spot.price,
+                    createdAt: spot.createdAt,
+                    updatedAt: spot.updatedAt,
+                    avgRating: spot.avgRating,
+                    previewImage: previewImage, 
+                };
+            }),
+        };
+
+        // Send the formatted response
+        res.json(formattedResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
+
 
 // Get spot by Id
 router.get('/:spotId', async (req, res, next) => {
