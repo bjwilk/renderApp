@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
        foreignKey: 'ownerId'
       });
 
+<<<<<<< HEAD
       User.hasMany(models.Booking, {
           foreignKey: 'userId',
       });
@@ -16,7 +17,16 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Review, {
           foreignKey: 'userId',
         as: 'ReviewdSpots'
+=======
+      User.hasMany(models.Review, {
+        foreignKey: 'userId'
+>>>>>>> dev
       })
+
+      User.hasMany(models.Booking, {
+        foreignKey: 'userId'
+      })
+    
     }
   };
 
