@@ -99,12 +99,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
 
 
-
-
-
-
 // Get reviews by spotsId
-
 
 
 
@@ -122,5 +117,10 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
 
 // Delete review if userId if === req.user.id
+
+
+
+
+
 
   module.exports = router;
