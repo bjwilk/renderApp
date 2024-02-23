@@ -33,10 +33,10 @@ module.exports = {
       },
     ];
 
-    return queryInterface.bulkInsert('Bookings', bookingsData, {});
+    return queryInterface.bulkInsert('Bookings', bookingsData, {}, options);
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('Bookings', null, {});
+    return queryInterface.bulkDelete('Bookings', null, {}, options);
   }
 };

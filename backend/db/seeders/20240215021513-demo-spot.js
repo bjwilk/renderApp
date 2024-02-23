@@ -12,7 +12,6 @@ module.exports = {
    
     const spotsData = [
       {
-        id: 1,
         ownerId: 1,
         address: '123 Main Street',
         city: 'Example City',
@@ -25,7 +24,6 @@ module.exports = {
         price: 100,
       },
       {
-        id: 2,
         ownerId: 2,
         address: '456 Oak Avenue',
         city: 'Another City',
@@ -38,7 +36,6 @@ module.exports = {
         price: 150,
       },
       {
-        id: 3,
         ownerId: 3,
         address: '789 Pine Street',
         city: 'Yet Another City',
@@ -52,11 +49,11 @@ module.exports = {
       },
     ];
 
-    return queryInterface.bulkInsert('Spots', spotsData, {});
+    return queryInterface.bulkInsert('Spots', spotsData, {}, options);
 
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('Spots', null, {});
+    return queryInterface.bulkDelete('Spots', null, {}, options);
   }
 };

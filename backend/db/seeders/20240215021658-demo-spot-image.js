@@ -30,11 +30,11 @@ module.exports = {
       },
     ];
 
-    return queryInterface.bulkInsert('SpotImages', spotImagesData, {});
+    return queryInterface.bulkInsert('SpotImages', spotImagesData, {}, options);
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('SpotImages', null, {});
+    return queryInterface.bulkDelete('SpotImages', null, {}, options);
 
   }
 };

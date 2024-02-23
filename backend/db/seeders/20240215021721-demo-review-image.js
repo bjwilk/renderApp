@@ -27,11 +27,11 @@ module.exports = {
       },
     ];
 
-    return queryInterface.bulkInsert('ReviewImages', reviewImagesData, {});
+    return queryInterface.bulkInsert('ReviewImages', reviewImagesData, {}, options);
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('ReviewImages', null, {});
+    return queryInterface.bulkDelete('ReviewImages', null, {}, options);
 
   }
 };
