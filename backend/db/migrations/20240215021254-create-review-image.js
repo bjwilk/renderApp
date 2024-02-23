@@ -2,7 +2,9 @@
 let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
-}module.exports = {
+}
+
+module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('ReviewImages', {
       id: {
@@ -21,7 +23,8 @@ if (process.env.NODE_ENV === 'production') {
         onDelete: 'CASCADE'
       },
       url: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
