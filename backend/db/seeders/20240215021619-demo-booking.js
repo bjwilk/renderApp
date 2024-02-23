@@ -1,42 +1,40 @@
 'use strict';
-const { User, Spot } = require('../models');
+const { Booking } = require('../models');
 const bcrypt = require("bcryptjs");
 
 let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
 }
-
+const bookingsData = [
+  {
+    id: 1,
+    userId: 1,
+    spotId: 3,
+    startDate: '2024-02-20',
+    endDate: '2024-02-25',
+  },
+  {
+    id: 2,
+    userId: 2,
+    spotId: 1,
+    startDate: '2024-03-01',
+    endDate: '2024-03-10',
+  },
+  {
+    id: 3,
+    userId: 3,
+    spotId: 2,
+    startDate: '2024-03-15',
+    endDate: '2024-03-20',
+  },
+];
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    const bookingsData = [
-      {
-        id: 1,
-        userId: 1,
-        spotId: 3,
-        startDate: '2024-02-20',
-        endDate: '2024-02-25',
-      },
-      {
-        id: 2,
-        userId: 2,
-        spotId: 1,
-        startDate: '2024-03-01',
-        endDate: '2024-03-10',
-      },
-      {
-        id: 3,
-        userId: 3,
-        spotId: 2,
-        startDate: '2024-03-15',
-        endDate: '2024-03-20',
-      },
-    ];
-
-    return queryInterface.bulkInsert('Bookings', bookingsData, {}, options);
+  up: async (queryInterface, Sequelize) => {
+    await Booking.bulkCreate(bookingsData, { validate: true })
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('Bookings', null, {}, options);
+    return queryInterface.bulkDelete(options, 'Bookings', null, {});
   }
 };

@@ -35,14 +35,14 @@ module.exports = {
         username: 'FakeUser3',
         hashedPassword: bcrypt.hashSync('password3')
       }
-    ], { validate: true, ...options });
+    ], { validate: true, });
   },
 
   async down (queryInterface, Sequelize) {
     options.tableName = 'Users';
     const Op = Sequelize.Op;
-    return queryInterface.bulkDelete( {
+    return queryInterface.bulkDelete(options, {
       username: { [Op.in]: [ 'FakeUser1', 'FakeUser2', 'FakeUser3'] }
-    , ...options}, {});
+    ,}, {});
   }
 };
