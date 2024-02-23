@@ -8,21 +8,18 @@ if (process.env.NODE_ENV === 'production') {
 }
 const bookingsData = [
   {
-    id: 1,
     userId: 1,
     spotId: 3,
     startDate: '2024-02-20',
     endDate: '2024-02-25',
   },
   {
-    id: 2,
     userId: 2,
     spotId: 1,
     startDate: '2024-03-01',
     endDate: '2024-03-10',
   },
   {
-    id: 3,
     userId: 3,
     spotId: 2,
     startDate: '2024-03-15',

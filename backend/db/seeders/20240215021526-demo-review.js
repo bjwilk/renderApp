@@ -8,21 +8,18 @@ if (process.env.NODE_ENV === 'production') {
 }
 const reviewsData = [
   {
-    id: 1,
     userId: 1,
     spotId: 3,
     review: 'Great spot with amazing views!',
     stars: 5,
   },
   {
-    id: 2,
     userId: 2,
     spotId: 1,
     review: 'Nice location, friendly atmosphere.',
     stars: 4,
   },
   {
-    id: 3,
     userId: 3,
     spotId: 2,
     review: 'Cozy spot, perfect for a weekend getaway.',
