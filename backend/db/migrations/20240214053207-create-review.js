@@ -53,5 +53,5 @@ if (process.env.NODE_ENV === 'production') {
   },
   async down(queryInterface, Sequelize) {
     options.tableName = "Reviews";
-    return queryInterface.dropTable(options);  }
+    return queryInterface.dropTable('Reviews', options);  }
 };
