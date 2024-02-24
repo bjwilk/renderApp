@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
 const { requireAuth, setTokenCookie } = require('../../utils/auth');
-const { User, Spot, SpotImage } = require('../../db/models');
+const { User, Spot, SpotImage, Review } = require('../../db/models');
 
 const { handleValidationErrors } = require('../../utils/validation');
 const { body, validationResult } = require('express-validator');
@@ -97,6 +97,72 @@ router.get('/', async(req,res,next) => {
     return res.json(spots);
 });
 
+// GET all reviews by spot id
+router.get('/:spotId/reviews', async(req,res,next) => {
+    const reviews = await Review.findAll({
+        where: {
+            spotId: req.params.spotId
+        },
+        include: 'ReviewImages'
+    });
+    return res.json(reviews)
+})
+
+// POST review for Spot by spotId
+router.post('/:spotId/reviews', requireAuth, async (req, res, next) => {
+    const { review, stars } = req.body;
+
+    try {
+        // Check if Spot exists
+        const spot = await Spot.findByPk(req.params.spotId);
+        if (!spot) {
+            return res.status(404).json({
+                message: 'Spot could not be found'
+            });
+        }
+
+           // Check if the user already has a review for this spot
+           const existingReview = await Review.findOne({
+            where: {
+                userId: req.user.id,
+                spotId: req.params.spotId
+            }
+        });
+
+        if (existingReview) {
+            return res.status(500).json({
+                message: 'User already has a review for this spot'
+            });
+        }
+        
+        // Validate request body
+        if (!review || !stars || isNaN(stars) || stars < 1 || stars > 5) {
+            return res.status(400).json({
+                message: "Bad Request",
+                errors: {
+                    review: "Review text is required",
+                    stars: "Stars must be an integer from 1 to 5"
+                }
+            });
+        }
+
+
+     
+
+        // Create a new review
+        const createdReview = await Review.create({
+            userId: req.user.id,
+            spotId: req.params.spotId,
+            review: req.body.review,
+            stars: req.body.stars
+        });
+
+        return res.status(201).json(createdReview);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
 // Post a spot
@@ -120,7 +186,7 @@ router.post('/', requireAuth, [
                 return acc;
             }, {})
         });
-    }
+    } 
 
     const { address, city, state, country, lat, lng, name, description, price } = req.body;
 
