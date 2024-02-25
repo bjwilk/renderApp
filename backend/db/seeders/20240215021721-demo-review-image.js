@@ -25,8 +25,8 @@ module.exports = {
     await ReviewImage.bulkCreate(reviewImagesData, { validate: true })
   },
 
-  async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete(options, 'ReviewImages', null, {});
-
+  async down(queryInterface, Sequelize) {
+    return queryInterface.bulkDelete('ReviewImages', null, options);
   }
+  
 };
