@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
 const { requireAuth, setTokenCookie } = require('../../utils/auth');
-const { User, Spot, SpotImage, Review } = require('../../db/models');
+const { User, Spot, SpotImage, Review, ReviewImage } = require('../../db/models');
 
 const { handleValidationErrors } = require('../../utils/validation');
 const { body, validationResult } = require('express-validator');
