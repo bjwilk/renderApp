@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         model: 'Review', 
         key: 'id',
       },
-      onUpdate: 'CASCADE', 
+      
     },
     url: {
       type: DataTypes.STRING,
