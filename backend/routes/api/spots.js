@@ -1,10 +1,10 @@
 // backend/routes/api/spots.js
 const express = require('express');
-const { Op } = require('sequelize');
+const { Op, ValidationError } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
 const { requireAuth, setTokenCookie } = require('../../utils/auth');
-const { User, Spot, SpotImage } = require('../../db/models');
+const { User, Spot, SpotImage, Review, ReviewImage } = require('../../db/models');
 
 const { handleValidationErrors } = require('../../utils/validation');
 const { body, validationResult } = require('express-validator');
@@ -24,6 +24,65 @@ router.get('/user', requireAuth, async(req,res,next) => {
 
     return res.json(usersSpots)
 });
+
+// Get reviews by spotsId
+router.get('/:spotId/reviews', async (req, res, next) => {
+    try {
+      const spotWithReviews = await Spot.findByPk(req.params.spotId, {
+        include: [
+          {
+            model: Review,
+            as: 'Reviews',
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'firstName', 'lastName'],
+              },
+              {
+                model: ReviewImage,
+                as: 'ReviewImages',
+                attributes: ['id', 'url'],
+              },
+            ],
+          },
+        ],
+      });
+  
+      if (!spotWithReviews) {
+        return res.status(404).json({
+          message: 'Spot could not be found',
+        });
+      }
+  
+      // create formatted response
+      const formattedReviews = spotWithReviews.Reviews.map((review) => ({
+        id: review.id,
+        userId: review.userId,
+        spotId: review.spotId,
+        review: review.review,
+        stars: review.stars,
+        createdAt: review.createdAt,
+        updatedAt: review.updatedAt,
+        User: {
+          id: review.User.id,
+          firstName: review.User.firstName,
+          lastName: review.User.lastName,
+        },
+        ReviewImages: review.ReviewImages.map((image) => ({
+          id: image.id,
+          url: image.url,
+        })),
+      }));
+  
+      return res.json({
+        Reviews: formattedReviews,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
 // Get spot by Id
 router.get('/:spotId', async (req, res, next) => {
@@ -57,13 +116,62 @@ router.get('/:spotId', async (req, res, next) => {
     }
 });
 
+
 // Get all spots
 router.get('/', async(req,res,next) => {
     const spots = await Spot.findAll();
     return res.json(spots);
 });
 
+// Post a review for a spot based on spotId
+router.post('/:spotId/reviews', requireAuth, [
+    body('review').notEmpty().withMessage('Review text is required'),
+    body('stars').notEmpty().withMessage('Stars must be an integer from 1 to 5')
+], async(req,res,next) => {
+    // validationResult is built in to sequelize to extract errors from req 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.error('Validation errors:', errors.array())
+        return res.status(400).json({
+            message: 'Bad Request',
+            errors: errors.array().reduce((acc, err) => {
+                acc[err.param] = err.msg;
+                return acc;
+            }, {})
+        });
+    }
 
+    const { review, stars } = req.body;
+
+    try {
+        const spot = await Spot.findByPk(req.params.spotId, {
+            include: 'Reviews'
+        });
+        const newReview = await spot.createReview({
+            userId: req.user.id,
+            spotId: req.params.spotId,
+            review,
+            stars
+        })
+
+        return res.status(201).json(newReview);
+    } catch (error) {
+        console.error(error);
+        // sequelize returns ValidationErrorItem obj with info on error from the errors that was defined
+        if(error.name === 'SequelizeValidationError'){
+            return res.status(400).json({
+                message: 'Validation Error',
+                errors: error.errors.map(err => ({
+                    field: err.path,
+                    message: err.message,
+                    value: err.value,
+                    stars: "Stars must be an integer from 1 to 5"
+                }))
+            });
+        }
+        return res.status(500).json({ error: 'Could not create a new review' });
+    }
+})
 
 // Post a spot
 router.post('/', requireAuth, [
