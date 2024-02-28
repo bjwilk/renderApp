@@ -92,7 +92,7 @@ router.get("/:id", requireAuth, async (req, res, next) => {
       const formattedReview = {
         id: review.id,
         userId: review.userId,
-        spotId: review.spotId,
+        reviewId: review.spotId,
         review: review.review,
         stars: review.stars,
         createdAt: review.createdAt,
@@ -117,54 +117,130 @@ router.get("/:id", requireAuth, async (req, res, next) => {
 });
 
 // Add image to review if userId === req.user.id
-router.post('/:reviewId/images', requireAuth, async (req, res, next) => {
+router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   const { url } = req.body;
 
   try {
     // Find the review including ReviewImages
     const review = await Review.findByPk(req.params.reviewId, {
-      include: 'ReviewImages'
+      include: "ReviewImages",
     });
 
     // Error if no :reviewId
-    if(!review){
+    if (!review) {
       return res.json({
-        message: "Review could not be found"
-      })
+        message: "Review could not be found",
+      });
     }
-    console.log('Review:', review.ReviewImages.length)
+    console.log("Review:", review.ReviewImages.length);
 
-    if(review.ReviewImages.length > 10){
+    if (review.ReviewImages.length > 10) {
       return res.json({
-        message: "Maximum number of images for this resource was reached"
-      })
+        message: "Maximum number of images for this resource was reached",
+      });
     }
 
     // Create a new review image
     const reviewImage = await review.createReviewImage({
       reviewId: req.params.reviewId,
-      url
+      url,
     });
-
 
     // Extract only the desired properties
     const sanitizedResponse = {
       id: reviewImage.id,
-      url: reviewImage.url
+      url: reviewImage.url,
     };
 
     // Send the sanitized data in the response
     return res.json(sanitizedResponse);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Could not create a new review image' });
+    return res
+      .status(500)
+      .json({ error: "Could not create a new review image" });
   }
 });
 
-
-
 // Update review if userId === req.user.id
+router.put(
+  "/:reviewId",
+  requireAuth,
+  [
+    body("review").notEmpty().withMessage("Review text is required"),
+    body("stars")
+      .notEmpty()
+      .withMessage("Stars must be an integer from 1 to 5"),
+  ],
+  async (req, res) => {
+    const { reviewId } = req.params;
+    const { review, stars } = req.body;
+
+    try {
+      const userReview = await Review.findByPk(reviewId);
+
+      if (userReview.userId !== req.user.id) {
+        return res.status(404).json({
+          message: "No authorization to edit",
+        });
+      }
+
+      if (!userReview) {
+        return res.status(404).json({
+          message: "userReview couldn't be found",
+        });
+      }
+
+      // Validate input parameters
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: errors.array().reduce((acc, err) => {
+            acc[err.param] = err.msg;
+            return acc;
+          }, {}),
+        });
+      }
+
+      // Update the userReview
+      await userReview.update({
+        review,
+        stars,
+      });
+
+      return res.status(200).json(userReview);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Could not update the userReview" });
+    }
+  }
+);
 
 // Delete review if userId if === req.user.id
+router.delete("/:reviewId", requireAuth, async (req, res, next) => {
+  try {
+    const deletedReview = await Review.findByPk(req.params.reviewId);
 
+    if (deletedReview.userId !== req.user.id) {
+      return res.status(404).json({
+        message: "No authorization to delete",
+      });
+    }
+
+    if (!deletedReview) {
+      return res.status(404).json({
+        message: "Review couldn't be found",
+      });
+    }
+
+    await deletedReview.destroy();
+    return res.json({
+      message: "Successfully deleted",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Could not delete the Review" });
+  }
+});
 module.exports = router;
