@@ -66,11 +66,6 @@ router.get('/current', requireAuth, async (req, res, next) => {
 });
 
 
-// Get all bookings by spotId
-
-
-
-
 
 // Update booking
 
