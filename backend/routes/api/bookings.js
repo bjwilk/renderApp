@@ -3,8 +3,8 @@ const express = require('express');
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-const { setTokenCookie, restoreUser, requireAuth } = require('../../utils/auth');
-const { User, Spot, Booking, SpotImage } = require('../../db/models');
+const { setTokenCookie, restoreUser } = require('../../utils/auth');
+const { User, Spot, Booking } = require('../../db/models');
 
 const { check } = require('express-validator');
 const { handleValidationErrors } = require('../../utils/validation');
@@ -13,6 +13,7 @@ const { handleValidationErrors } = require('../../utils/validation');
 
 const router = express.Router();
 
+// Get all bookings by spotId
 // Get all bookings by userId
 router.get('/current', requireAuth, async (req, res, next) => {
   try {
@@ -66,11 +67,13 @@ router.get('/current', requireAuth, async (req, res, next) => {
 });
 
 
+// Get all bookings by spotId
+
+
+
+
 
 // Update booking
-
-
-
 // Delete booking
 
 

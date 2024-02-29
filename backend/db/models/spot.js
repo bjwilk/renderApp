@@ -7,10 +7,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Spot extends Model {
     static associate(models) {
-      
       Spot.hasMany(models.SpotImage, {
-        foreignKey: 'spotId',
-        as: 'SpotImages'
+        foreignKey: 'spotId'
        });
  
        Spot.belongsTo(models.User, {
