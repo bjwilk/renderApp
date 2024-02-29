@@ -4,7 +4,7 @@ const { Op, ValidationError } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
 const { requireAuth, setTokenCookie } = require('../../utils/auth');
-const { User, Spot, SpotImage, Review, ReviewImage } = require('../../db/models');
+const { User, Spot, SpotImage, Review, ReviewImage, Booking } = require('../../db/models');
 
 const { handleValidationErrors } = require('../../utils/validation');
 const { body, validationResult } = require('express-validator');
@@ -116,17 +116,68 @@ router.get('/:spotId', async (req, res, next) => {
     }
 });
 
+// Get all bookings by spotId
+router.get('/:spotId/bookings', requireAuth, async (req, res, next) => {
+    try {
+        const spot = await Spot.findByPk(req.params.spotId, {
+            include: [
+                {
+                    model: Booking,
+                    attributes: ['id', 'spotId', 'userId', 'startDate', 'endDate', 'createdAt', 'updatedAt'],
+                },
+            ],
+        });
 
-// Get all spots
-router.get('/', async(req,res,next) => {
-    const spots = await Spot.findAll();
-    return res.json(spots);
+        if (spot) {
+            const formattedBookings = spot.Bookings.map((booking) => ({
+                spotId: booking.spotId,
+                startDate: booking.startDate,
+                endDate: booking.endDate,
+                createdAt: booking.createdAt,
+                updatedAt: booking.updatedAt,
+            }));
+
+            const notUserBookings = formattedBookings.map((booking) => ({
+                spotId: booking.spotId,
+                startDate: booking.startDate,
+                endDate: booking.endDate,
+            }));
+
+            if (req.user.id === spot.ownerId) {
+                // If the current user is the owner of the spot
+                return res.json({
+                    Bookings: formattedBookings.map((booking) => ({
+                        ...booking,
+                        id: booking.id,
+                        userId: req.user.id,
+                        User: {
+                            id: req.user.id,
+                            firstName: req.user.firstName,
+                            lastName: req.user.lastName,
+                        },
+                    })),
+                });
+            } else {
+                // If the current user is not the owner of the spot
+                return res.json({
+                    Bookings: notUserBookings,
+                });
+            }
+        } else {
+            return res.status(404).json({
+                message: 'Spot not found',
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-// Post a review for a spot based on spotId
-router.post('/:spotId/reviews', requireAuth, [
-    body('review').notEmpty().withMessage('Review text is required'),
-    body('stars').notEmpty().withMessage('Stars must be an integer from 1 to 5')
+// POST Booking from Spot by spotId
+router.post('/:spotId/bookings', requireAuth, [
+    body('startDate').notEmpty().withMessage("startDate cannot be in the past"),
+    body('endDate').notEmpty().withMessage("endDate cannot be on or before startDate")
 ], async(req,res,next) => {
     // validationResult is built in to sequelize to extract errors from req 
     const errors = validationResult(req);
@@ -140,38 +191,77 @@ router.post('/:spotId/reviews', requireAuth, [
             }, {})
         });
     }
-
-    const { review, stars } = req.body;
+    const { startDate, endDate } = req.body;
 
     try {
-        const spot = await Spot.findByPk(req.params.spotId, {
-            include: 'Reviews'
-        });
-        const newReview = await spot.createReview({
-            userId: req.user.id,
-            spotId: req.params.spotId,
-            review,
-            stars
-        })
-
-        return res.status(201).json(newReview);
-    } catch (error) {
-        console.error(error);
-        // sequelize returns ValidationErrorItem obj with info on error from the errors that was defined
-        if(error.name === 'SequelizeValidationError'){
-            return res.status(400).json({
-                message: 'Validation Error',
-                errors: error.errors.map(err => ({
-                    field: err.path,
-                    message: err.message,
-                    value: err.value,
-                    stars: "Stars must be an integer from 1 to 5"
-                }))
+        const spot = await Spot.findByPk(req.params.spotId);
+        if (!spot) {
+            return res.status(404).json({
+                message: 'Spot not found',
             });
         }
-        return res.status(500).json({ error: 'Could not create a new review' });
+
+        // Check if there are existing bookings for the specified date range
+        const existingBookings = await Booking.findOne({
+            where: {
+                spotId: req.params.spotId,
+                [Op.and]: [
+                    { startDate: { [Op.lte]: endDate } },
+                    { endDate: { [Op.gte]: startDate } }
+                ]
+            }
+        });
+        
+
+        if (existingBookings) {
+            const response = {
+                message: 'The spot is already booked for the specified date range',
+                startDate: existingBookings.startDate,
+                endDate: existingBookings.endDate,
+            };
+        
+            if (req.body.startDate >= existingBookings.startDate && req.body.startDate <= existingBookings.endDate) {
+                return res.status(400).json(response);
+            }
+        
+            if (req.body.endDate >= existingBookings.startDate && req.body.endDate <= existingBookings.endDate) {
+                return res.status(400).json(response);
+            }
+        }
+        
+
+        // Assuming you have set up the association correctly in the Spot model
+        const newBooking = await spot.createBooking({
+            userId: req.user.id,
+            startDate,
+            endDate
+        });
+
+        // Format the response using the created booking
+        const formattedResponse = {
+            spotId: newBooking.spotId,
+            userId: newBooking.userId,
+            startDate: newBooking.startDate,
+            endDate: newBooking.endDate,
+            createdAt: newBooking.createdAt,
+            updatedAt: newBooking.updatedAt
+        };
+
+        return res.json(formattedResponse);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 })
+
+// Get all spots
+router.get('/', async(req,res,next) => {
+    const spots = await Spot.findAll();
+    return res.json(spots);
+});
+
+// Post a review for a spot based on spotId
 
 // Post a spot
 router.post('/', requireAuth, [
