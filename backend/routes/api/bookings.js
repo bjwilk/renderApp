@@ -98,7 +98,6 @@ router.put('/:bookingId', requireAuth, [
   const { startDate, endDate } = req.body;
 
   try {
-    // Check if the booking with the specified ID exists
     const booking = await Booking.findByPk(bookingId);
 
     if (!booking) {
