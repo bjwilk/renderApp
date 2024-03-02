@@ -23,11 +23,11 @@ const { body, validationResult } = require("express-validator");
 const router = express.Router();
 
 // Get all reviews by current user  if userId === req.user.id
-router.get("/:id", requireAuth, async (req, res, next) => {
+router.get("/current", requireAuth, async (req, res, next) => {
   try {
     const userReviews = await Review.findAll({
       where: {
-        userId: req.params.id,
+        userId: req.user.id,
       },
       include: [
         {
@@ -116,7 +116,7 @@ router.get("/:id", requireAuth, async (req, res, next) => {
   }
 });
 
-// Add image to review if userId === req.user.id
+// POST image to review if userId === req.user.id
 router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   const { url } = req.body;
 

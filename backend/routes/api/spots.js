@@ -19,7 +19,7 @@ const { body, validationResult } = require("express-validator");
 const router = express.Router();
 
 // Get all spots for current user
-router.get("/user", requireAuth, async (req, res, next) => {
+router.get("/current", requireAuth, async (req, res, next) => {
   const usersSpots = await Spot.findAll({
     where: {
       ownerId: req.user.id,
@@ -447,8 +447,8 @@ router.post(
   }
 );
 
-// POST route to create a new image for a spot
-router.post("/images/:spotId", requireAuth, async (req, res) => {
+// POST create a new image for a spot
+router.post("/:spotId/images", requireAuth, async (req, res) => {
   const { spotId } = req.params;
   const { url, preview } = req.body;
 
