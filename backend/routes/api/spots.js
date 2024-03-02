@@ -570,6 +570,10 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
       return res.status(404).json({
         message: "Spot couldn't be found",
       });
+    } else if(spot.ownerId !== req.user.id){
+        return res.status(403).json({
+            message: "Not authorized to delete spot"
+        })
     }
 
     // Delete the spot
