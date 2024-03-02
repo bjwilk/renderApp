@@ -32,6 +32,9 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete(options, 'Bookings', null, {});
-  }
+    options.tableName = "Bookings"
+    const Op = Sequelize.Op;
+    return queryInterface.bulkDelete(options, {
+      userId: { [Op.in]: [ 1, 2, 3] }
+    ,}, {});  }
 };
