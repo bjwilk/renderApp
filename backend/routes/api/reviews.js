@@ -126,6 +126,13 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
       include: "ReviewImages",
     });
 
+    // Error is review does not belong to user
+    if(review.userId !== req.user.id){
+      return res.status(401).json({
+        message: "Not Authorized"
+      })
+    }
+
     // Error if no :reviewId
     if (!review) {
       return res.json({
@@ -180,7 +187,7 @@ router.put(
       const userReview = await Review.findByPk(reviewId);
 
       if (userReview.userId !== req.user.id) {
-        return res.status(404).json({
+        return res.status(401).json({
           message: "No authorization to edit",
         });
       }
@@ -191,15 +198,24 @@ router.put(
         });
       }
 
-      // Validate input parameters
-      const errors = validationResult(req);
+     // Validate input parameters
+     const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => err.msg);
+
+        const fieldNames = [
+          "review",
+          "stars",
+        ];
+        const errorsObject = {};
+
+        for (let i = 0; i < fieldNames.length; i++) {
+          errorsObject[fieldNames[i]] = formattedErrors[i];
+        }
+
         return res.status(400).json({
           message: "Bad Request",
-          errors: errors.array().reduce((acc, err) => {
-            acc[err.param] = err.msg;
-            return acc;
-          }, {}),
+          errors: errorsObject,
         });
       }
 

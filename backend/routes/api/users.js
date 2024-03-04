@@ -11,6 +11,12 @@ const { handleValidationErrors } = require("../../utils/validation");
 const router = express.Router();
 
 const validateSignup = [
+  check("firstName")
+  .exists({ checkFalsy: true })
+  .withMessage("Please provide a firstName."),
+  check("lastName")
+  .exists({ checkFalsy: true })
+  .withMessage("Please provide a lastName."),
   check("email")
     .exists({ checkFalsy: true })
     .isEmail()
@@ -32,31 +38,58 @@ router.get("/", async (req, res) => {
   return res.json(users);
 });
 
+
 // Sign up
 router.post("/", validateSignup, async (req, res) => {
-  const { firstName, lastName, email, password, username } = req.body;
-  const hashedPassword = bcrypt.hashSync(password);
-  const user = await User.create({
-    firstName,
-    lastName,
-    email,
-    username,
-    hashedPassword,
-  });
+  try {
+    const { firstName, lastName, email, password, username } = req.body;
+    const hashedPassword = bcrypt.hashSync(password);
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      username,
+      hashedPassword,
+    });
+    const safeUser = {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      username: user.username,
+    };
 
-  const safeUser = {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    username: user.username,
-  };
+    await setTokenCookie(res, safeUser);
 
-  await setTokenCookie(res, safeUser);
+    return res.json({
+      user: safeUser,
+    });
+  } catch (error) {
+    // Check if the error is a Sequelize validation error
+    // name: 'SequelizeUniqueConstraintError',
+    // errors: [
+    //   ValidationErrorItem {
+    //     message: 'email must be unique',
+    //     type: 'unique violation',
+    //     path: 'email',
+    
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const errors = {};
+      error.errors.forEach((err) => {
+        errors[err.path] = err.message;
+      });
 
-  return res.json({
-    user: safeUser,
-  });
+      const response = {
+        message: 'Validation error',
+        errors: errors,
+      };
+
+      return res.status(400).json(response);
+    }
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
+
 
 module.exports = router;

@@ -108,21 +108,36 @@ router.put(
     try {
       const booking = await Booking.findByPk(bookingId);
 
+      if (booking.userId !== req.user.id) {
+        return res.status(401).json({
+          message: "No authorization to edit",
+        });
+      }
+
       if (!booking) {
         return res.status(404).json({
           message: "Booking couldn't be found",
         });
       }
 
-      // Validate input parameters
-      const errors = validationResult(req);
+     // Validate input parameters
+     const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => err.msg);
+
+        const fieldNames = [
+          "startDate",
+          "endDate",
+        ];
+        const errorsObject = {};
+
+        for (let i = 0; i < fieldNames.length; i++) {
+          errorsObject[fieldNames[i]] = formattedErrors[i];
+        }
+
         return res.status(400).json({
           message: "Bad Request",
-          errors: errors.array().reduce((acc, err) => {
-            acc[err.param] = err.msg;
-            return acc;
-          }, {}),
+          errors: errorsObject,
         });
       }
 
@@ -134,6 +149,13 @@ router.put(
 
       return res.status(200).json(booking);
     } catch (error) {
+      if (error instanceof Sequelize.UniqueConstraintError) {
+        // Handle unique constraint violation error specifically if needed
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: ["Unique constraint violation"],
+        });
+      }
       console.error(error);
       return res.status(500).json({ error: "Could not update the booking" });
     }
@@ -142,12 +164,24 @@ router.put(
 
 // Delete booking
 router.delete("/:bookingId", requireAuth, async (req, res, next) => {
-  const deleteBooking = await Booking.findByPk(req.params.bookingId);
+  const deleteBooking = await Booking.findByPk(req.params.bookingId, {
+    include: [
+      {
+        model: User
+      }
+    ]
+  });
 
   if (!deleteBooking) {
     return res.json({
       message: "Booking could not be found",
     });
+  }
+
+  if(deleteBooking.userId !== req.user.id){
+    return res.status(401).json({
+      message: "Not authorized to delete"
+    })
   }
 
   // Custom validation to check if startDate has not been started
