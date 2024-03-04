@@ -293,7 +293,7 @@ router.post(
         }
         return value;
       }),
-      body("endDate")
+    body("endDate")
       .notEmpty()
       .withMessage("endDate cannot be on or before startDate")
       .custom((value, { req }) => {
@@ -321,8 +321,7 @@ router.post(
         }, {}),
       });
     }
-    
-    
+
     const { startDate, endDate } = req.body;
 
     try {
@@ -359,21 +358,19 @@ router.post(
           message: "The spot is already booked for the specified date range",
           errors: existingBookings.map((booking) => ({
             startDate: "Start date conflicts with an existing booking",
-            endDate: "End date conflicts with an existing booking"
+            endDate: "End date conflicts with an existing booking",
           }))[0], // Only take the first error object
         };
-      
+
         return res.status(403).json(response);
       }
-      
-
 
       const newBooking = await spot.createBooking({
         userId: req.user.id,
         startDate,
         endDate,
       });
-      console.log(newBooking.id)
+      console.log(newBooking.id);
 
       // Format the response using the created booking
       const formattedResponse = {
@@ -395,25 +392,95 @@ router.post(
 );
 
 // Get all spots
-router.get('/', [
-    query('page').optional().isInt({ min: 1 }).withMessage('Page must be greater than or equal to 1'),
-    query('size').optional().isInt({ min: 1, max: 20 }).withMessage('Size must be between 1 and 20'),
-  ], async (req, res) => {
+router.get(
+  "/",
+  [
+    query("page")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("Page must be greater than or equal to 1"),
+    query("size")
+      .optional()
+      .isInt({ min: 1, max: 20 })
+      .withMessage("Size must be between 1 and 20"),
+    query("minLat")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
+      .custom((value, { req }) => {
+        const parsedValue = parseFloat(value);
+        if (isNaN(parsedValue) || parsedValue < -90 || parsedValue > 90) {
+          throw new Error("Invalid latitude value");
+        }
+        return true;
+      })
+      .withMessage("Latitude must be a valid number between -90 and 90"),
+    query("maxLat")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
+      .custom((value, { req }) => {
+        const parsedValue = parseFloat(value);
+        if (isNaN(parsedValue) || parsedValue < -90 || parsedValue > 90) {
+          throw new Error("Invalid latitude value");
+        }
+        return true;
+      })
+      .withMessage("Latitude must be a valid number between -90 and 90"),
+    query("minLng")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
+      .custom((value, { req }) => {
+        const parsedValue = parseFloat(value);
+        if (isNaN(parsedValue) || parsedValue < -180 || parsedValue > 180) {
+          throw new Error("Invalid latitude value");
+        }
+        return true;
+      })
+      .withMessage("Latitude must be a valid number between -180 and 180"),
+    query("maxLng")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
+      .custom((value, { req }) => {
+        const parsedValue = parseFloat(value);
+        if (isNaN(parsedValue) || parsedValue < -180 || parsedValue > 180) {
+          throw new Error("Invalid latitude value");
+        }
+        return true;
+      })
+      .withMessage("Latitude must be a valid number between -180 and 180"),
+    query("minPrice")
+      .optional()
+      .isDecimal({ min: 0 })
+      .withMessage("Minimum price must be greater than or equal to 0"),
+    query("maxPrice")
+      .optional()
+      .isDecimal({ min: 0 })
+      .withMessage("Maximum price must be greater than or equal to 0"),
+  ],
+  async (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
-        message: 'Bad Request',
+        message: "Bad Request",
         errors: errors.array().reduce((acc, err) => {
           acc[err.param] = err.msg;
           return acc;
         }, {}),
       });
     }
-  
+
     // Extract validated query parameters
-    const { page = 1, size = 20 } = req.query;
-  
+    const {
+      page = 1,
+      size = 20,
+      minLat = Number.MIN_SAFE_INTEGER, // Set default values here
+      maxLat = Number.MAX_SAFE_INTEGER,
+      minLng = Number.MIN_SAFE_INTEGER,
+      maxLng = Number.MAX_SAFE_INTEGER,
+      minPrice = 0,
+      maxPrice = Number.MAX_SAFE_INTEGER,
+    } = req.query;
+
     try {
       const spots = await Spot.findAll({
         include: [
@@ -421,10 +488,15 @@ router.get('/', [
             model: SpotImage,
           },
         ],
+        where: {
+          lat: { [Op.between]: [minLat, maxLat] },
+          lng: { [Op.between]: [minLng, maxLng] },
+          price: { [Op.between]: [minPrice, maxPrice] },
+        },
         limit: size,
         offset: (page - 1) * size,
       });
-  
+
       const filteredResponse = spots.map((spot) => {
         const spotData = {
           id: spot.id,
@@ -441,14 +513,14 @@ router.get('/', [
           createdAt: spot.createdAt,
           updatedAt: spot.updatedAt,
         };
-  
+
         return {
           ...spotData,
           avgRating: spot.avgRating, // You need to adjust this based on your model
           previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
         };
       });
-  
+
       return res.json({
         Spots: filteredResponse,
         page: parseInt(page, 10),
@@ -456,10 +528,11 @@ router.get('/', [
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-  });
-  
+  }
+);
+
 // Post a review for a spot based on spotId
 router.post(
   "/:spotId/reviews",
@@ -475,10 +548,7 @@ router.post(
     if (!errors.isEmpty()) {
       const formattedErrors = errors.array().map((err) => err.msg);
 
-      const fieldNames = [
-        "review",
-        "stars",
-      ];
+      const fieldNames = ["review", "stars"];
       const errorsObject = {};
 
       for (let i = 0; i < fieldNames.length; i++) {
@@ -490,9 +560,6 @@ router.post(
         errors: errorsObject,
       });
     }
-
-
-
 
     const { review, stars } = req.body;
 
@@ -528,17 +595,17 @@ router.post(
 
       return res.status(201).json(newReview);
     } catch (error) {
-        if (error instanceof ValidationError) {
-            // Handle validation error
-            const validationErrors = error.errors.map((validationError) => ({
-              [validationError.path]: validationError.message,
-            }));
-          
-            return res.status(400).json({
-              message: "Bad Request",
-              errors: validationErrors,
-            });
-          }
+      if (error instanceof ValidationError) {
+        // Handle validation error
+        const validationErrors = error.errors.map((validationError) => ({
+          [validationError.path]: validationError.message,
+        }));
+
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: validationErrors,
+        });
+      }
       return res.status(500).json({ error: "Could not create a new review" });
     }
   }
