@@ -21,17 +21,23 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
     include: [
       {
         model: Spot,
-        where: { ownerId: req.user.id },
       },
     ],
   });
 
   // Checks if SpotImage belongs to the current User's Spot
-  if (!spotImage || !spotImage.Spot) {
+  if (!spotImage) {
     return res.json({
       message:
-        "SpotImage not found or not associated with the current user's Spot",
+        "SpotImage not found",
     });
+  }
+
+  // Checks for authorization
+  if(spotImage.Spot.ownerId !== req.user.id){
+    return res.json({
+      message: "Forbidden"
+    })
   }
 
   await spotImage.destroy();

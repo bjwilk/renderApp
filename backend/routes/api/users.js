@@ -20,7 +20,7 @@ const validateSignup = [
   check("email")
     .exists({ checkFalsy: true })
     .isEmail()
-    .withMessage("Please provide a valid email."),
+    .withMessage("Invalid email"),
   check("username")
     .exists({ checkFalsy: true })
     .isLength({ min: 4 })
@@ -80,11 +80,11 @@ router.post("/", validateSignup, async (req, res) => {
       });
 
       const response = {
-        message: 'Validation error',
+        message: "User already exists",
         errors: errors,
       };
 
-      return res.status(400).json(response);
+      return res.status(500).json(response);
     }
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });

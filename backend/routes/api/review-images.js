@@ -21,17 +21,23 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
     include: [
       {
         model: Review,
-        where: { userId: req.user.id },
       },
     ],
   });
 
   // Checks if reviewImage belongs to the current User's Spot
-  if (!reviewImage || !reviewImage.Review) {
+  if (!reviewImage) {
     return res.json({
       message:
         "reviewImage not found or not associated with the current user's Spot",
     });
+  }
+
+  // Checks if authorized
+  if(reviewImage.Review.userId !== req.user.id){
+    return res.json({
+      message: "Forbidden"
+    })
   }
 
   await reviewImage.destroy();

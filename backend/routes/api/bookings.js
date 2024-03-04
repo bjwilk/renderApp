@@ -110,7 +110,7 @@ router.put(
 
       if (booking.userId !== req.user.id) {
         return res.status(401).json({
-          message: "No authorization to edit",
+          message: "Forbidden",
         });
       }
 
@@ -180,7 +180,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
 
   if(deleteBooking.userId !== req.user.id){
     return res.status(401).json({
-      message: "Not authorized to delete"
+      message: "Forbidden"
     })
   }
 

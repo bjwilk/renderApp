@@ -129,7 +129,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     // Error is review does not belong to user
     if(review.userId !== req.user.id){
       return res.status(401).json({
-        message: "Not Authorized"
+        message: "Forbidden"
       })
     }
 
@@ -188,7 +188,7 @@ router.put(
 
       if (userReview.userId !== req.user.id) {
         return res.status(401).json({
-          message: "No authorization to edit",
+          message: "Forbidden",
         });
       }
 
@@ -240,7 +240,7 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
 
     if (deletedReview.userId !== req.user.id) {
       return res.status(404).json({
-        message: "No authorization to delete",
+        message: "Forbidden",
       });
     }
 

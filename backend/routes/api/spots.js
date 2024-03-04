@@ -377,6 +377,7 @@ router.post(
 
       // Format the response using the created booking
       const formattedResponse = {
+        id: newBooking.id,
         spotId: newBooking.spotId,
         userId: newBooking.userId,
         startDate: newBooking.startDate,
@@ -458,6 +459,7 @@ router.get('/', [
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  
 // Post a review for a spot based on spotId
 router.post(
   "/:spotId/reviews",
@@ -685,7 +687,7 @@ router.put(
 
       if (spot.ownerId !== req.user.id) {
         return res.status(401).json({
-          message: "No authorization to edit",
+          message: "Forbidden",
         });
       }
 
@@ -758,7 +760,7 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
       });
     } else if (spot.ownerId !== req.user.id) {
       return res.status(403).json({
-        message: "Not authorized to delete spot",
+        message: "Forbidden",
       });
     }
 
