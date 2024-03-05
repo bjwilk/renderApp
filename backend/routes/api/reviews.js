@@ -139,9 +139,8 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
         message: "Review could not be found",
       });
     }
-    console.log("Review:", review.ReviewImages.length);
 
-    if (review.ReviewImages.length > 10) {
+    if (review.ReviewImages.length >= 10) {
       return res.json({
         message: "Maximum number of images for this resource was reached",
       });
