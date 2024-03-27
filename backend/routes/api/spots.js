@@ -482,55 +482,59 @@ router.get(
     } = req.query;
 
     try {
-      const spots = await Spot.findAll({
+      const usersSpots = await Spot.findAll({
         include: [
           {
             model: SpotImage,
           },
         ],
-        where: {
-          lat: { [Op.between]: [minLat, maxLat] },
-          lng: { [Op.between]: [minLng, maxLng] },
-          price: { [Op.between]: [minPrice, maxPrice] },
-        },
-        limit: size,
-        offset: (page - 1) * size,
       });
-
-      const filteredResponse = spots.map((spot) => {
-        const spotData = {
-          id: spot.id,
-          ownerId: spot.ownerId,
-          address: spot.address,
-          city: spot.city,
-          state: spot.state,
-          country: spot.country,
-          lat: spot.lat,
-          lng: spot.lng,
-          name: spot.name,
-          description: spot.description,
-          price: spot.price,
-          createdAt: spot.createdAt,
-          updatedAt: spot.updatedAt,
-        };
-
-        return {
-          ...spotData,
-          avgRating: spot.avgRating, // You need to adjust this based on your model
-          previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
-        };
-      });
-
+  
+      const filteredResponse = await Promise.all(
+        usersSpots.map(async (spot) => {
+          const spotData = {
+            id: spot.id,
+            ownerId: spot.ownerId,
+            address: spot.address,
+            city: spot.city,
+            state: spot.state,
+            country: spot.country,
+            lat: spot.lat,
+            lng: spot.lng,
+            name: spot.name,
+            description: spot.description,
+            price: spot.price,
+          };
+  
+          // Fetch all reviews for the spot
+          const reviews = await Review.findAll({
+            where: {
+              spotId: spotData.id,
+            },
+          });
+  
+          // Calculate average rating for the spot
+          const averageRating =
+            reviews.length > 0
+              ? reviews.reduce((sum, review) => sum + review.stars, 0) /
+                reviews.length
+              : null;
+  
+          return {
+            ...spotData,
+            avgRating: averageRating,
+            previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
+          };
+        })
+      );
+  
       return res.json({
         Spots: filteredResponse,
-        page: parseInt(page, 10),
-        size: parseInt(size, 10),
       });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
+    }  }
 );
 
 // Post a review for a spot based on spotId
@@ -672,7 +676,19 @@ router.post(
         price,
       });
 
-      return res.status(201).json(newSpot);
+      const filteredNewSpot = {
+        address: newSpot.address,
+        city: newSpot.city,
+        state: newSpot.state,
+        country: newSpot.country,
+        lat: newSpot.lat,
+        lng: newSpot.lng,
+        name: newSpot.name,
+        description: newSpot.description,
+        price: newSpot.price
+      };
+
+      return res.status(201).json(filteredNewSpot);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Could not create a new spot" });
@@ -808,7 +824,7 @@ router.put(
       return res.status(200).json(spot);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Could not update the spot" });
+      return res.status(404).json({ message: "Spot couldn't be found" });
     }
   }
 );
