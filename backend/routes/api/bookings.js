@@ -15,7 +15,7 @@ const { handleValidationErrors } = require("../../utils/validation");
 
 const router = express.Router();
 
-// Get all bookings by userId
+// Get all current users bookings
 router.get("/current", requireAuth, async (req, res, next) => {
   try {
     const usersBookings = await Booking.findAll({
@@ -114,21 +114,12 @@ router.put(
         });
       }
 
-      if (!booking) {
-        return res.status(404).json({
-          message: "Booking couldn't be found",
-        });
-      }
-
-     // Validate input parameters
-     const errors = validationResult(req);
+      // Validate input parameters
+      const errors = validationResult(req);
       if (!errors.isEmpty()) {
         const formattedErrors = errors.array().map((err) => err.msg);
 
-        const fieldNames = [
-          "startDate",
-          "endDate",
-        ];
+        const fieldNames = ["startDate", "endDate"];
         const errorsObject = {};
 
         for (let i = 0; i < fieldNames.length; i++) {
@@ -141,23 +132,88 @@ router.put(
         });
       }
 
-      // Update the spot
-      await booking.update({
-        startDate,
-        endDate,
+  
+      // Check if there are existing bookings for the specified date range
+      const existingBookings = await Booking.findAll({
+        where: {
+          spotId: booking.spotId,
+          [Op.or]: [
+            {
+              [Op.and]: [
+                { startDate: { [Op.lte]: endDate } },
+                { endDate: { [Op.gte]: startDate } },
+              ],
+            },
+            {
+              [Op.and]: [
+                { startDate: { [Op.lte]: startDate } },
+                { endDate: { [Op.gte]: startDate } },
+              ],
+            },
+          ],
+        },
       });
 
-      return res.status(200).json(booking);
-    } catch (error) {
-      if (error instanceof Sequelize.UniqueConstraintError) {
-        // Handle unique constraint violation error specifically if needed
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: ["Unique constraint violation"],
-        });
+      if (existingBookings && existingBookings.length > 0) {
+        const response = {
+          message: "Sorry, this spot is already booked for the specified dates",
+          errors: existingBookings.map((booking) => ({
+            startDate: "Start date conflicts with an existing booking",
+            endDate: "End date conflicts with an existing booking",
+          }))[0], // Only take the first error object
+        };
+
+        return res.status(403).json(response);
       }
-      console.error(error);
-      return res.status(500).json({ error: "Could not update the booking" });
+
+      // If there is an overlapping booking, return a 409 Conflict response
+      // if (
+      //   startDate >= existingBookings.startDate &&
+      //   startDate <= existingBookings.endDate
+      // ) {
+      //   // Conflict with start date
+      //   return res.status(403).json({
+      //     message: "Sorry, this spot is already booked for the specified dates",
+      //     errors: {
+      //       startDate: "Start date conflicts with an existing booking",
+      //     },
+      //   });
+      // } else if (
+      //   endDate >= existingBookings.startDate &&
+      //   endDate <= existingBookings.endDate
+      // ) {
+      //   // Conflict with end date
+      //   return res.status(403).json({
+      //     message: "Sorry, this spot is already booked for the specified dates",
+      //     errors: {
+      //       endDate: "End date conflicts with an existing booking",
+      //     },
+      //   });
+      // } else if (
+      //   startDate < existingBookings.startDate &&
+      //   endDate > existingBookings.endDate
+      // ) {
+      //   // Conflict with both start and end dates
+      //   return res.status(403).json({
+      //     message: "Sorry, this spot is already booked for the specified dates",
+      //     errors: {
+      //       startDate: "Start date conflicts with an existing booking",
+      //       endDate: "End date conflicts with an existing booking",
+      //     },
+      //   });
+      // } 
+
+        // Update the spot
+        await booking.update({
+          startDate,
+          endDate,
+        });
+
+        return res.status(200).json(booking);
+      
+    } catch (error) {
+      console.log(error)
+      return res.status(404).json({ message: "Booking couldn't be found" });
     }
   }
 );
@@ -167,9 +223,9 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   const deleteBooking = await Booking.findByPk(req.params.bookingId, {
     include: [
       {
-        model: User
-      }
-    ]
+        model: User,
+      },
+    ],
   });
 
   if (!deleteBooking) {
@@ -178,10 +234,10 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
     });
   }
 
-  if(deleteBooking.userId !== req.user.id){
+  if (deleteBooking.userId !== req.user.id) {
     return res.status(401).json({
-      message: "Forbidden"
-    })
+      message: "Forbidden",
+    });
   }
 
   // Custom validation to check if startDate has not been started
@@ -195,7 +251,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   console.log(differenceInMilliseconds);
 
   if (bookingStartDate.toISOString() <= currentDate.toISOString()) {
-    return res.status(400).json({
+    return res.status(403).json({
       message:
         "Deletion is not allowed because the startDate has already passed",
     });

@@ -231,7 +231,9 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
 
     if (spot) {
       const formattedBookings = spot.Bookings.map((booking) => ({
+        id: booking.id,
         spotId: booking.spotId,
+        userId: booking.userId,
         startDate: booking.startDate,
         endDate: booking.endDate,
         createdAt: booking.createdAt,
@@ -248,14 +250,12 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
         // If the current user is the owner of the spot
         return res.json({
           Bookings: formattedBookings.map((booking) => ({
-            ...booking,
-            id: booking.id,
-            userId: req.user.id,
             User: {
               id: req.user.id,
               firstName: req.user.firstName,
               lastName: req.user.lastName,
             },
+            ...booking,          
           })),
         });
       } else {
@@ -312,13 +312,12 @@ router.post(
     // validationResult is built in to sequelize to extract errors from req
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.error("Validation errors:", errors.array());
       return res.status(400).json({
         message: "Bad Request",
-        errors: errors.array().reduce((acc, err) => {
-          acc[err.path] = err.msg;
-          return acc;
-        }, {}),
+        errors: {
+          startDate: "startDate cannot be in the past",
+          endDate: "endDate cannot be on or before startDate"
+        }
       });
     }
 
@@ -548,23 +547,6 @@ router.post(
       .withMessage("Stars must be an integer from 1 to 5"),
   ],
   async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const formattedErrors = errors.array().map((err) => err.msg);
-
-      const fieldNames = ["review", "stars"];
-      const errorsObject = {};
-
-      for (let i = 0; i < fieldNames.length; i++) {
-        errorsObject[fieldNames[i]] = formattedErrors[i];
-      }
-
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: errorsObject,
-      });
-    }
-
     const { review, stars } = req.body;
 
     try {
@@ -578,7 +560,7 @@ router.post(
       });
 
       if (!spot) {
-        return res.json({
+        return res.status(404).json({
           message: "Spot couldn't be found",
         });
       }
@@ -592,27 +574,23 @@ router.post(
 
       // checks if userId exist in Reviews table
       if (spot.Reviews.some((review) => review.userId === req.user.id)) {
-        return res.json({
+        return res.status(500).json({
           message: "User already has a review for this spot",
         });
       }
 
       return res.status(201).json(newReview);
     } catch (error) {
-      if (error instanceof ValidationError) {
-        // Handle validation error
-        const validationErrors = error.errors.map((validationError) => ({
-          [validationError.path]: validationError.message,
-        }));
 
         return res.status(400).json({
           message: "Bad Request",
-          errors: validationErrors,
+          errors: {
+            "review": "Review text is required",
+            "stars": "Stars must be an integer from 1 to 5",
+          },
         });
       }
-      return res.status(500).json({ error: "Could not create a new review" });
     }
-  }
 );
 
 // Post a spot

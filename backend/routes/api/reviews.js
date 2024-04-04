@@ -116,7 +116,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
   }
 });
 
-// POST image to review if userId === req.user.id
+// POST image to review
 router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   const { url } = req.body;
 
@@ -127,21 +127,14 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     });
 
     // Error is review does not belong to user
-    if(review.userId !== req.user.id){
+    if (review.userId !== req.user.id) {
       return res.status(401).json({
-        message: "Forbidden"
-      })
-    }
-
-    // Error if no :reviewId
-    if (!review) {
-      return res.json({
-        message: "Review could not be found",
+        message: "Forbidden",
       });
     }
 
     if (review.ReviewImages.length >= 10) {
-      return res.json({
+      return res.status(403).json({
         message: "Maximum number of images for this resource was reached",
       });
     }
@@ -162,9 +155,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     return res.json(sanitizedResponse);
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ error: "Could not create a new review image" });
+    return res.status(404).json({ message: "Review could not be found" });
   }
 });
 
@@ -182,41 +173,27 @@ router.put(
     const { reviewId } = req.params;
     const { review, stars } = req.body;
 
+   // Validate input parameters
+   const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+     return res.status(400).json({
+       message: "Bad Request",
+       errors: {
+        review: "Review text is required",
+        stars: "Stars must be an integer from 1 to 5",
+      },
+     });
+   }
     try {
       const userReview = await Review.findByPk(reviewId);
 
+
       if (userReview.userId !== req.user.id) {
-        return res.status(401).json({
+        return res.status(403).json({
           message: "Forbidden",
         });
       }
 
-      if (!userReview) {
-        return res.status(404).json({
-          message: "userReview couldn't be found",
-        });
-      }
-
-     // Validate input parameters
-     const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map((err) => err.msg);
-
-        const fieldNames = [
-          "review",
-          "stars",
-        ];
-        const errorsObject = {};
-
-        for (let i = 0; i < fieldNames.length; i++) {
-          errorsObject[fieldNames[i]] = formattedErrors[i];
-        }
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: errorsObject,
-        });
-      }
 
       // Update the userReview
       await userReview.update({
@@ -224,10 +201,17 @@ router.put(
         stars,
       });
 
+    
       return res.status(200).json(userReview);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Could not update the userReview" });
+      return res.status(400).json({
+        message: "Bad Request",
+       errors: {
+        review: "Review text is required",
+        stars: "Stars must be an integer from 1 to 5",
+      },
+      });
     }
   }
 );
@@ -243,19 +227,14 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
       });
     }
 
-    if (!deletedReview) {
-      return res.status(404).json({
-        message: "Review couldn't be found",
-      });
-    }
-
     await deletedReview.destroy();
-    return res.json({
+    return res.status(200).json({
       message: "Successfully deleted",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Could not delete the Review" });
+    return res.status(404).json({
+      message: "Review couldn't be found" });
   }
 });
 module.exports = router;

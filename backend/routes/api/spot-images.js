@@ -27,7 +27,7 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
 
   // Checks if SpotImage belongs to the current User's Spot
   if (!spotImage) {
-    return res.json({
+    return res.status(404).json({
       message:
         "SpotImage not found",
     });

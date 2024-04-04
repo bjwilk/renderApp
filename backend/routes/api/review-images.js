@@ -25,16 +25,16 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
     ],
   });
 
-  // Checks if reviewImage belongs to the current User's Spot
+  // Checks if reviewImage exist
   if (!reviewImage) {
-    return res.json({
+    return res.status(404).json({
       message:
-        "reviewImage not found or not associated with the current user's Spot",
+      "Spot Image couldn't be found",
     });
   }
 
   // Checks if authorized
-  if(reviewImage.Review.userId !== req.user.id){
+  if(reviewImage.userId !== req.user.id){
     return res.json({
       message: "Forbidden"
     })
