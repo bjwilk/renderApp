@@ -394,146 +394,90 @@ router.post(
 router.get(
   "/",
   [
-    query("page")
-      .optional()
-      .isInt({ min: 1 })
-      .withMessage("Page must be greater than or equal to 1"),
-    query("size")
-      .optional()
-      .isInt({ min: 1, max: 20 })
-      .withMessage("Size must be between 1 and 20"),
-    query("minLat")
-      .optional()
-      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
-      .custom((value, { req }) => {
-        const parsedValue = parseFloat(value);
-        if (isNaN(parsedValue) || parsedValue < -90 || parsedValue > 90) {
-          throw new Error("Invalid latitude value");
-        }
-        return true;
-      })
-      .withMessage("Latitude must be a valid number between -90 and 90"),
-    query("maxLat")
-      .optional()
-      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
-      .custom((value, { req }) => {
-        const parsedValue = parseFloat(value);
-        if (isNaN(parsedValue) || parsedValue < -90 || parsedValue > 90) {
-          throw new Error("Invalid latitude value");
-        }
-        return true;
-      })
-      .withMessage("Latitude must be a valid number between -90 and 90"),
-    query("minLng")
-      .optional()
-      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
-      .custom((value, { req }) => {
-        const parsedValue = parseFloat(value);
-        if (isNaN(parsedValue) || parsedValue < -180 || parsedValue > 180) {
-          throw new Error("Invalid latitude value");
-        }
-        return true;
-      })
-      .withMessage("Latitude must be a valid number between -180 and 180"),
-    query("maxLng")
-      .optional()
-      .isDecimal({ decimal_digits: "0,6" }) // Validate as a decimal with up to 6 digits
-      .custom((value, { req }) => {
-        const parsedValue = parseFloat(value);
-        if (isNaN(parsedValue) || parsedValue < -180 || parsedValue > 180) {
-          throw new Error("Invalid latitude value");
-        }
-        return true;
-      })
-      .withMessage("Latitude must be a valid number between -180 and 180"),
-    query("minPrice")
-      .optional()
-      .isDecimal({ min: 0 })
-      .withMessage("Minimum price must be greater than or equal to 0"),
-    query("maxPrice")
-      .optional()
-      .isDecimal({ min: 0 })
-      .withMessage("Maximum price must be greater than or equal to 0"),
+    query("page").optional().isInt({ min: 1, max: 10 }).withMessage("Page must be greater than or equal to 1"),
+    query("size").optional().isInt({ min: 1, max: 20 }).withMessage("Size must be between 1 and 20"),
+    query("minLat").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Latitude must be a valid number between -90 and 90"),
+    query("maxLat").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Latitude must be a valid number between -90 and 90"),
+    query("minLng").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Longitude must be a valid number between -180 and 180"),
+    query("maxLng").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Longitude must be a valid number between -180 and 180"),
+    query("minPrice").optional().isDecimal({ min: 0 }).withMessage("Minimum price must be greater than or equal to 0"),
+    query("maxPrice").optional().isDecimal({ min: 0 }).withMessage("Maximum price must be greater than or equal to 0"),
   ],
   async (req, res) => {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: errors.array().reduce((acc, err) => {
-          acc[err.param] = err.msg;
-          return acc;
-        }, {}),
-      });
-    }
-
-    // Extract validated query parameters
-    const {
-      page = 1,
-      size = 20,
-      minLat = Number.MIN_SAFE_INTEGER, // Set default values here
-      maxLat = Number.MAX_SAFE_INTEGER,
-      minLng = Number.MIN_SAFE_INTEGER,
-      maxLng = Number.MAX_SAFE_INTEGER,
-      minPrice = 0,
-      maxPrice = Number.MAX_SAFE_INTEGER,
-    } = req.query;
-
     try {
+  // Check for validation errors
+const errors = validationResult(req);
+if (!errors.isEmpty()) {
+  const formattedErrors = errors.array().reduce((acc, err) => {
+    acc[err.path] = err.msg;
+    return acc;
+  }, {});
+  return res.status(400).json({ message: "Bad Request", errors: formattedErrors });
+}
+
+
+      // Extract validated query parameters with default values
+      const {
+        page = 1,
+        size = 20,
+        minLat = -90,
+        maxLat = 90,
+        minLng = -180,
+        maxLng = 180,
+        minPrice = 0,
+        maxPrice = Number.MAX_SAFE_INTEGER,
+      } = req.query;
+
+      // Filter spots based on query parameters directly in the database query
       const usersSpots = await Spot.findAll({
-        include: [
-          {
-            model: SpotImage,
-          },
-        ],
+        where: {
+          lat: { [Op.between]: [minLat, maxLat] },
+          lng: { [Op.between]: [minLng, maxLng] },
+          price: { [Op.between]: [minPrice, maxPrice] },
+        },
+        include: [{ model: SpotImage }],
       });
-  
-      const filteredResponse = await Promise.all(
-        usersSpots.map(async (spot) => {
-          const spotData = {
-            id: spot.id,
-            ownerId: spot.ownerId,
-            address: spot.address,
-            city: spot.city,
-            state: spot.state,
-            country: spot.country,
-            lat: spot.lat,
-            lng: spot.lng,
-            name: spot.name,
-            description: spot.description,
-            price: spot.price,
-          };
-  
-          // Fetch all reviews for the spot
-          const reviews = await Review.findAll({
-            where: {
-              spotId: spotData.id,
-            },
-          });
-  
-          // Calculate average rating for the spot
-          const averageRating =
-            reviews.length > 0
-              ? reviews.reduce((sum, review) => sum + review.stars, 0) /
-                reviews.length
-              : null;
-  
-          return {
-            ...spotData,
-            avgRating: averageRating,
-            previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
-          };
-        })
-      );
-  
+
+
+      // Slice the spots based on the requested page and size
+      const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
+
+      const filteredResponse = await Promise.all(paginatedSpots.map(async (spot) => {
+        // Fetch all reviews for the spot
+        const reviews = await Review.findAll({ where: { spotId: spot.id } });
+
+        // Calculate average rating for the spot
+        const averageRating = reviews.length > 0
+          ? reviews.reduce((sum, review) => sum + review.stars, 0) / reviews.length
+          : null;
+
+        return {
+          id: spot.id,
+          ownerId: spot.ownerId,
+          address: spot.address,
+          city: spot.city,
+          state: spot.state,
+          country: spot.country,
+          lat: spot.lat,
+          lng: spot.lng,
+          name: spot.name,
+          description: spot.description,
+          price: spot.price,
+          avgRating: averageRating,
+          previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
+        };
+      }));
+
       return res.json({
         Spots: filteredResponse,
+        page: page,
+        size: size
       });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
-    }  }
+    }
+  }
 );
 
 // Post a review for a spot based on spotId
