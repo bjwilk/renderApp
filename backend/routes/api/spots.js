@@ -18,6 +18,13 @@ const { body, validationResult, query } = require("express-validator");
 
 const router = express.Router();
 
+const setDefaultValues = (req, res, next) => {
+  req.query.page = req.query.page || 1; // Default value for page parameter
+  req.query.size = req.query.size || 20; // Default value for size parameter
+  next(); // Call the next middleware or route handler
+};
+
+
 // Get all spots for current user
 router.get("/current", requireAuth, async (req, res, next) => {
   try {
@@ -396,7 +403,8 @@ router.post(
 router.get(
   "/",
   [
-    query("page").optional().isInt({ min: 1, max: 10 }).withMessage("Page must be greater than or equal to 1"),
+    setDefaultValues,
+    query("page").optional().isInt({ min: 1 }).withMessage("Page must be greater than or equal to 1"),
     query("size").optional().isInt({ min: 1, max: 20 }).withMessage("Size must be between 1 and 20"),
     query("minLat").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Latitude must be a valid number between -90 and 90"),
     query("maxLat").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Latitude must be a valid number between -90 and 90"),
