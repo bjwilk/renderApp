@@ -309,17 +309,6 @@ router.post(
       }),
   ],
   async (req, res, next) => {
-    // validationResult is built in to sequelize to extract errors from req
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: {
-          startDate: "startDate cannot be in the past",
-          endDate: "endDate cannot be on or before startDate"
-        }
-      });
-    }
 
     const { startDate, endDate } = req.body;
 
@@ -330,6 +319,19 @@ router.post(
           message: "Spot not found",
         });
       }
+
+          // validationResult is built in to sequelize to extract errors from req
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: {
+            startDate: "startDate cannot be in the past",
+            endDate: "endDate cannot be on or before startDate"
+          }
+        });
+      }
+  
 
       // Check if there are existing bookings for the specified date range
       const existingBookings = await Booking.findAll({
