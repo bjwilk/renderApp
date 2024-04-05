@@ -327,15 +327,21 @@ router.post(
         });
       }
 
-          // validationResult is built in to sequelize to extract errors from req
+      // Validate input parameters
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => err.msg);
+
+        const fieldNames = ["startDate", "endDate"];
+        const errorsObject = {};
+
+        for (let i = 0; i < fieldNames.length; i++) {
+          errorsObject[fieldNames[i]] = formattedErrors[i];
+        }
+
         return res.status(400).json({
           message: "Bad Request",
-          errors: {
-            startDate: "startDate cannot be in the past",
-            endDate: "endDate cannot be on or before startDate"
-          }
+          errors: errorsObject,
         });
       }
   
