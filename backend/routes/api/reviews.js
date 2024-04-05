@@ -167,26 +167,38 @@ router.put(
     body("review").notEmpty().withMessage("Review text is required"),
     body("stars")
       .notEmpty()
-      .withMessage("Stars must be an integer from 1 to 5"),
+      .isInt({ min: 1, max: 5 }).withMessage("Stars must be an integer from 1 to 5"),
   ],
   async (req, res) => {
     const { reviewId } = req.params;
     const { review, stars } = req.body;
 
-   // Validate input parameters
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) {
-     return res.status(400).json({
-       message: "Bad Request",
-       errors: {
-        review: "Review text is required",
-        stars: "Stars must be an integer from 1 to 5",
-      },
-     });
-   }
+    // Validate input parameters
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map((err) => err.msg);
+
+      const fieldNames = ["review", "stars"];
+      const errorsObject = {};
+
+      for (let i = 0; i < fieldNames.length; i++) {
+        errorsObject[fieldNames[i]] = formattedErrors[i];
+      }
+
+      return res.status(400).json({
+        message: "Bad Request",
+        errors: errorsObject,
+      });
+    }
+
     try {
       const userReview = await Review.findByPk(reviewId);
 
+      if (!userReview) {
+        return res.status(404).json({
+          message: "Review couldn't be found",
+        });
+      }
 
       if (userReview.userId !== req.user.id) {
         return res.status(403).json({
@@ -194,23 +206,17 @@ router.put(
         });
       }
 
-
       // Update the userReview
       await userReview.update({
         review,
         stars,
       });
 
-    
       return res.status(200).json(userReview);
     } catch (error) {
       console.error(error);
-      return res.status(400).json({
-        message: "Bad Request",
-       errors: {
-        review: "Review text is required",
-        stars: "Stars must be an integer from 1 to 5",
-      },
+      return res.status(500).json({
+        message: "Internal Server Error",
       });
     }
   }

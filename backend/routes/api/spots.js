@@ -316,11 +316,11 @@ router.post(
       }),
   ],
   async (req, res, next) => {
-
+    const { spotId } = req.params
     const { startDate, endDate } = req.body;
-
     try {
-      const spot = await Spot.findByPk(req.params.spotId);
+      const spot = await Spot.findByPk(spotId);
+
       if (!spot) {
         return res.status(404).json({
           message: "Spot not found",
@@ -339,11 +339,10 @@ router.post(
         });
       }
   
-
       // Check if there are existing bookings for the specified date range
       const existingBookings = await Booking.findAll({
         where: {
-          spotId: req.params.spotId,
+          spotId: spotId,
           [Op.or]: [
             {
               [Op.and]: [
@@ -361,16 +360,40 @@ router.post(
         },
       });
 
-      if (existingBookings && existingBookings.length > 0) {
-        const response = {
-          message: "The spot is already booked for the specified date range",
-          errors: existingBookings.map((booking) => ({
-            startDate: "Start date conflicts with an existing booking",
-            endDate: "End date conflicts with an existing booking",
-          }))[0], // Only take the first error object
-        };
-
-        return res.status(403).json(response);
+      for (const booking of existingBookings) {
+        if (
+          new Date(startDate).toISOString().split("T")[0] >=
+            new Date(booking.dataValues.startDate)
+              .toISOString()
+              .split("T")[0] &&
+          new Date(startDate).toISOString().split("T")[0] <=
+            new Date(booking.dataValues.endDate).toISOString().split("T")[0]
+        ) {
+          // Conflict with start date
+          return res.status(403).json({
+            message:
+              "Sorry, this spot is already booked for the specified dates",
+            errors: {
+              startDate: "Start date conflicts with an existing booking",
+            },
+          });
+        } else if (
+          new Date(endDate).toISOString().split("T")[0] >=
+            new Date(booking.dataValues.startDate)
+              .toISOString()
+              .split("T")[0] &&
+          new Date(endDate).toISOString().split("T")[0] <=
+            new Date(booking.dataValues.endDate).toISOString().split("T")[0]
+        ) {
+          // Conflict with end date
+          return res.status(403).json({
+            message:
+              "Sorry, this spot is already booked for the specified dates",
+            errors: {
+              endDate: "End date conflicts with an existing booking",
+            },
+          });
+        }
       }
 
       const newBooking = await spot.createBooking({
@@ -378,7 +401,6 @@ router.post(
         startDate,
         endDate,
       });
-      console.log(newBooking.id);
 
       // Format the response using the created booking
       const formattedResponse = {
