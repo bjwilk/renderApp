@@ -110,6 +110,7 @@ router.put(
       const currentDate = new Date();
 
       if (booking.userId !== req.user.id) {
+        console.log(booking.userId);
         return res.status(401).json({
           message: "Forbidden",
         });
@@ -163,38 +164,65 @@ router.put(
       });
 
       for (const booking of existingBookings) {
-        if (
-          new Date(startDate).toISOString().split("T")[0] >=
-            new Date(booking.dataValues.startDate)
-              .toISOString()
-              .split("T")[0] &&
-          new Date(startDate).toISOString().split("T")[0] <=
-            new Date(booking.dataValues.endDate).toISOString().split("T")[0]
-        ) {
-          // Conflict with start date
-          return res.status(403).json({
-            message:
-              "Sorry, this spot is already booked for the specified dates",
-            errors: {
-              startDate: "Start date conflicts with an existing booking",
-            },
-          });
-        } else if (
-          new Date(endDate).toISOString().split("T")[0] >=
-            new Date(booking.dataValues.startDate)
-              .toISOString()
-              .split("T")[0] &&
-          new Date(endDate).toISOString().split("T")[0] <=
-            new Date(booking.dataValues.endDate).toISOString().split("T")[0]
-        ) {
-          // Conflict with end date
-          return res.status(403).json({
-            message:
-              "Sorry, this spot is already booked for the specified dates",
-            errors: {
-              endDate: "End date conflicts with an existing booking",
-            },
-          });
+        const conflictingBooking = {
+          startDate: booking.dataValues.startDate,
+          endDate: booking.dataValues.endDate,
+        };
+
+        if (booking.dataValues.userId !== req.user.id) {
+          if (
+            new Date(startDate).toISOString().split("T")[0] >=
+              new Date(booking.dataValues.startDate)
+                .toISOString()
+                .split("T")[0] &&
+            new Date(startDate).toISOString().split("T")[0] <=
+              new Date(booking.dataValues.endDate).toISOString().split("T")[0]
+          ) {
+            // Conflict with start date
+            return res.status(403).json({
+              message:
+                "Sorry, this spot is already booked for the specified dates",
+              errors: {
+                startDate: "Start date conflicts with an existing booking",
+                conflictingBooking: conflictingBooking,
+              },
+            });
+          } else if (
+            new Date(endDate).toISOString().split("T")[0] >=
+              new Date(booking.dataValues.startDate)
+                .toISOString()
+                .split("T")[0] &&
+            new Date(endDate).toISOString().split("T")[0] <=
+              new Date(booking.dataValues.endDate).toISOString().split("T")[0]
+          ) {
+            // Conflict with end date
+            return res.status(403).json({
+              message:
+                "Sorry, this spot is already booked for the specified dates",
+              errors: {
+                endDate: "End date conflicts with an existing booking",
+                conflictingBooking: conflictingBooking,
+              },
+            });
+          } else if (
+            new Date(startDate).toISOString().split("T")[0] <=
+              new Date(booking.dataValues.startDate)
+                .toISOString()
+                .split("T")[0] &&
+            new Date(endDate).toISOString().split("T")[0] >=
+              new Date(booking.dataValues.endDate).toISOString().split("T")[0]
+          ) {
+            // Conflict with end date
+            return res.status(403).json({
+              message:
+                "Sorry, this spot is already booked for the specified dates",
+              errors: {
+                startDate: "Start date conflicts with an existing booking",
+                endDate: "End date conflicts with an existing booking",
+                conflictingBooking: conflictingBooking,
+              },
+            });
+          }
         }
       }
 

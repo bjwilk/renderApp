@@ -326,6 +326,12 @@ router.post(
         });
       }
 
+      if(spot.ownerId === req.user.id){
+        return res.status(403).json( {
+          message: "Spot must NOT belong to the current user."
+        })
+      }
+
       // Validate input parameters
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -366,6 +372,11 @@ router.post(
       });
 
       for (const booking of existingBookings) {
+        const conflictingBooking = {
+          startDate: booking.dataValues.startDate,
+          endDate: booking.dataValues.endDate,
+        };
+
         if (
           new Date(startDate).toISOString().split("T")[0] >=
             new Date(booking.dataValues.startDate)
@@ -380,6 +391,7 @@ router.post(
               "Sorry, this spot is already booked for the specified dates",
             errors: {
               startDate: "Start date conflicts with an existing booking",
+              conflictingBooking: conflictingBooking,
             },
           });
         } else if (
@@ -396,6 +408,26 @@ router.post(
               "Sorry, this spot is already booked for the specified dates",
             errors: {
               endDate: "End date conflicts with an existing booking",
+              conflictingBooking: conflictingBooking,
+
+            },
+          });
+        } else if (
+          new Date(startDate).toISOString().split("T")[0] <=
+            new Date(booking.dataValues.startDate)
+              .toISOString()
+              .split("T")[0] &&
+          new Date(endDate).toISOString().split("T")[0] >=
+            new Date(booking.dataValues.endDate).toISOString().split("T")[0]
+        ) {
+          // Conflict with end date
+          return res.status(403).json({
+            message:
+              "Sorry, this spot is already booked for the specified dates",
+            errors: {
+              startDate: "Start date conflicts with an existing booking",
+              endDate: "End date conflicts with an existing booking",
+              conflictingBooking: conflictingBooking,
             },
           });
         }
@@ -425,7 +457,6 @@ router.post(
     }
   }
 );
-
 // Get all spots
 router.get(
   "/",
@@ -560,7 +591,6 @@ router.post(
     const { review, stars } = req.body;
 
     try {
-
       const spot = await Spot.findByPk(req.params.spotId, {
         include: [
           {
@@ -576,24 +606,23 @@ router.post(
         });
       }
 
-          // Handle validation response
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const formattedErrors = errors.array().map((err) => err.msg);
+      // Handle validation response
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => err.msg);
 
-      const fieldNames = ["review", "stars"];
-      const errorsObject = {};
+        const fieldNames = ["review", "stars"];
+        const errorsObject = {};
 
-      for (let i = 0; i < fieldNames.length; i++) {
-        errorsObject[fieldNames[i]] = formattedErrors[i];
+        for (let i = 0; i < fieldNames.length; i++) {
+          errorsObject[fieldNames[i]] = formattedErrors[i];
+        }
+
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: errorsObject,
+        });
       }
-
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: errorsObject,
-      });
-    }
-
 
       // checks if userId exists in Reviews table
       if (spot.Reviews.some((review) => review.userId === req.user.id)) {
@@ -601,8 +630,6 @@ router.post(
           message: "User already has a review for this spot",
         });
       }
-
-    
 
       const newReview = await spot.createReview({
         userId: req.user.id,
@@ -635,7 +662,9 @@ router.post(
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")
-      .isLength({ max: 50 })
+      .notEmpty()
+      .withMessage("Name must be less than 50 characters")
+      .isLength({ min: 1, max: 50 })
       .withMessage("Name must be less than 50 characters"),
     body("description").notEmpty().withMessage("Description is required"),
     body("price")
@@ -664,7 +693,7 @@ router.post(
       for (let i = 0; i < fieldNames.length; i++) {
         errorsObject[fieldNames[i]] = formattedErrors[i];
       }
-
+      console.log(errorsObject);
       return res.status(400).json({
         message: "Bad Request",
         errors: errorsObject,
@@ -731,10 +760,10 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     const spot = await Spot.findByPk(spotId);
 
     // Check if user owns spot
-    if(spot.ownerId !== req.user.id){
+    if (spot.ownerId !== req.user.id) {
       return res.status(403).json({
-        message: "Forbidden"
-      })
+        message: "Forbidden",
+      });
     }
 
     // Create a new image for the spot
@@ -747,11 +776,11 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     formattedResponse = {
       id: newImage.id,
       url: newImage.url,
-      preview: newImage.preview
-    }
+      preview: newImage.preview,
+    };
     return res.status(200).json(formattedResponse);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(404).json({
       message: "Spot couldn't be found",
     });
@@ -774,7 +803,9 @@ router.put(
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")
-      .isLength({ max: 50 })
+      .notEmpty()
+      .withMessage("Name must be less than 50 characters")
+      .isLength({ min: 1, max: 50 })
       .withMessage("Name must be less than 50 characters"),
     body("description").notEmpty().withMessage("Description is required"),
     body("price")
@@ -798,8 +829,7 @@ router.put(
     try {
       // Check if the spot with the specified ID exists
       const spot = await Spot.findByPk(spotId);
-
-      if (spot.ownerId !== req.user.id) {
+      if (spot.Booking.userId !== req.user.id) {
         return res.status(401).json({
           message: "Forbidden",
         });

@@ -61,7 +61,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
         },
         {
           model: ReviewImage,
-          attributes: ["reviewId", "url"],
+          attributes: ["id", "url"],
           as: "ReviewImages", // Alias for the ReviewImages association
         },
       ],
@@ -74,6 +74,10 @@ router.get("/current", requireAuth, async (req, res, next) => {
           ? review.Spot.SpotImages[0].url
           : null;
 
+          const mappedReviewImages = review.ReviewImages.map(image => ({
+            id: image.id,
+            url: image.url
+          }));
       // Add the previewImage property to the spot object
       const spot = {
         id: review.Spot.id,
@@ -103,7 +107,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
           lastName: review.User.lastName,
         },
         Spot: spot, // Use the modified spot object
-        ReviewImages: review.ReviewImages,
+        ReviewImages: mappedReviewImages,
       };
 
       return formattedReview;
