@@ -557,26 +557,9 @@ router.post(
       .withMessage("Stars must be an integer from 1 to 5"),
   ],
   async (req, res, next) => {
+    const { review, stars } = req.body;
+
     try {
-      const { review, stars } = req.body;
-
-      // Handle validation response
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map((err) => err.msg);
-
-        const fieldNames = ["review", "stars"];
-        const errorsObject = {};
-
-        for (let i = 0; i < fieldNames.length; i++) {
-          errorsObject[fieldNames[i]] = formattedErrors[i];
-        }
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: errorsObject,
-        });
-      }
 
       const spot = await Spot.findByPk(req.params.spotId, {
         include: [
@@ -593,6 +576,25 @@ router.post(
         });
       }
 
+          // Handle validation response
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map((err) => err.msg);
+
+      const fieldNames = ["review", "stars"];
+      const errorsObject = {};
+
+      for (let i = 0; i < fieldNames.length; i++) {
+        errorsObject[fieldNames[i]] = formattedErrors[i];
+      }
+
+      return res.status(400).json({
+        message: "Bad Request",
+        errors: errorsObject,
+      });
+    }
+
+
       // checks if userId exists in Reviews table
       if (spot.Reviews.some((review) => review.userId === req.user.id)) {
         return res.status(500).json({
@@ -600,13 +602,7 @@ router.post(
         });
       }
 
-      // Check if stars are within the allowed range
-      if (stars < 1 || stars > 5) {
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: ["Stars must be an integer from 1 to 5"],
-        });
-      }
+    
 
       const newReview = await spot.createReview({
         userId: req.user.id,
@@ -734,10 +730,11 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     // Check if the spot with the specified ID exists
     const spot = await Spot.findByPk(spotId);
 
-    if (!spot) {
-      return res.status(404).json({
-        message: "Spot couldn't be found",
-      });
+    // Check if user owns spot
+    if(spot.ownerId !== req.user.id){
+      return res.status(403).json({
+        message: "Forbidden"
+      })
     }
 
     // Create a new image for the spot
@@ -754,10 +751,10 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     }
     return res.status(200).json(formattedResponse);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ error: "Could not create a new image for the spot" });
+    console.log(error)
+    return res.status(404).json({
+      message: "Spot couldn't be found",
+    });
   }
 });
 

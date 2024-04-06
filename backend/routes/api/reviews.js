@@ -172,8 +172,22 @@ router.put(
   async (req, res) => {
     const { reviewId } = req.params;
     const { review, stars } = req.body;
+    try {
+      const userReview = await Review.findByPk(reviewId);
 
-    // Validate input parameters
+      if (!userReview) {
+        return res.status(404).json({
+          message: "Review couldn't be found",
+        });
+      }
+
+      if (userReview.userId !== req.user.id) {
+        return res.status(403).json({
+          message: "Forbidden",
+        });
+      }
+
+          // Validate input parameters
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const formattedErrors = errors.array().map((err) => err.msg);
@@ -191,20 +205,6 @@ router.put(
       });
     }
 
-    try {
-      const userReview = await Review.findByPk(reviewId);
-
-      if (!userReview) {
-        return res.status(404).json({
-          message: "Review couldn't be found",
-        });
-      }
-
-      if (userReview.userId !== req.user.id) {
-        return res.status(403).json({
-          message: "Forbidden",
-        });
-      }
 
       // Update the userReview
       await userReview.update({
@@ -228,7 +228,7 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     const deletedReview = await Review.findByPk(req.params.reviewId);
 
     if (deletedReview.userId !== req.user.id) {
-      return res.status(404).json({
+      return res.status(403).json({
         message: "Forbidden",
       });
     }

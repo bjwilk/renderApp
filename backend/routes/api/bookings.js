@@ -223,13 +223,13 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   });
 
   if (!deleteBooking) {
-    return res.json({
+    return res.status(404).json({
       message: "Booking could not be found",
     });
   }
 
   if (deleteBooking.userId !== req.user.id) {
-    return res.status(401).json({
+    return res.status(403).json({
       message: "Forbidden",
     });
   }
@@ -252,7 +252,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   }
 
   await deleteBooking.destroy();
-  return res.json({
+  return res.status(200).json({
     message: "Successfully deleted",
   });
 });

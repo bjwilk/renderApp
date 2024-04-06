@@ -29,12 +29,12 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
   if (!reviewImage) {
     return res.status(404).json({
       message:
-      "Spot Image couldn't be found",
+      "Review Image couldn't be found",
     });
   }
 
   // Checks if authorized
-  if(reviewImage.userId !== req.user.id){
+  if(reviewImage.Review.userId !== req.user.id){
     return res.json({
       message: "Forbidden"
     })
