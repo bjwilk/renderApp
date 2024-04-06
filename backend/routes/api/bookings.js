@@ -199,12 +199,12 @@ router.put(
       }
 
       // Update the spot
-      // await booking.update({
-      //   startDate,
-      //   endDate,
-      // });
+      await booking.update({
+        startDate,
+        endDate,
+      });
 
-      // return res.status(200).json(booking);
+      return res.status(200).json(booking);
     } catch (error) {
       console.log(error);
       return res.status(404).json({ message: "Booking couldn't be found" });
