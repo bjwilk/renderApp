@@ -637,6 +637,8 @@ router.post(
       });
 
       const filteredNewSpot = {
+        id: newSpot.id,
+        ownerId: newSpot.ownerId,
         address: newSpot.address,
         city: newSpot.city,
         state: newSpot.state,
@@ -645,7 +647,9 @@ router.post(
         lng: newSpot.lng,
         name: newSpot.name,
         description: newSpot.description,
-        price: newSpot.price
+        price: newSpot.price,
+        createdAt: newSpot.createdAt,
+        updatedAt: newSpot.updatedAt
       };
 
       return res.status(201).json(filteredNewSpot);
