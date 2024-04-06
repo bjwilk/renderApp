@@ -24,7 +24,6 @@ const setDefaultValues = (req, res, next) => {
   next(); // Call the next middleware or route handler
 };
 
-
 // Get all spots for current user
 router.get("/current", requireAuth, async (req, res, next) => {
   try {
@@ -262,7 +261,7 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
               firstName: req.user.firstName,
               lastName: req.user.lastName,
             },
-            ...booking,          
+            ...booking,
           })),
         });
       } else {
@@ -316,7 +315,7 @@ router.post(
       }),
   ],
   async (req, res, next) => {
-    const { spotId } = req.params
+    const { spotId } = req.params;
     const { startDate, endDate } = req.body;
     try {
       const spot = await Spot.findByPk(spotId);
@@ -344,7 +343,7 @@ router.post(
           errors: errorsObject,
         });
       }
-  
+
       // Check if there are existing bookings for the specified date range
       const existingBookings = await Booking.findAll({
         where: {
@@ -432,27 +431,52 @@ router.get(
   "/",
   [
     setDefaultValues,
-    query("page").optional().isInt({ min: 1 }).withMessage("Page must be greater than or equal to 1"),
-    query("size").optional().isInt({ min: 1, max: 20 }).withMessage("Size must be between 1 and 20"),
-    query("minLat").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Latitude must be a valid number between -90 and 90"),
-    query("maxLat").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Latitude must be a valid number between -90 and 90"),
-    query("minLng").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Longitude must be a valid number between -180 and 180"),
-    query("maxLng").optional().isDecimal({ decimal_digits: "0,6" }).withMessage("Longitude must be a valid number between -180 and 180"),
-    query("minPrice").optional().isDecimal({ min: 0 }).withMessage("Minimum price must be greater than or equal to 0"),
-    query("maxPrice").optional().isDecimal({ min: 0 }).withMessage("Maximum price must be greater than or equal to 0"),
+    query("page")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("Page must be greater than or equal to 1"),
+    query("size")
+      .optional()
+      .isInt({ min: 1, max: 20 })
+      .withMessage("Size must be between 1 and 20"),
+    query("minLat")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" })
+      .withMessage("Latitude must be a valid number between -90 and 90"),
+    query("maxLat")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" })
+      .withMessage("Latitude must be a valid number between -90 and 90"),
+    query("minLng")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" })
+      .withMessage("Longitude must be a valid number between -180 and 180"),
+    query("maxLng")
+      .optional()
+      .isDecimal({ decimal_digits: "0,6" })
+      .withMessage("Longitude must be a valid number between -180 and 180"),
+    query("minPrice")
+      .optional()
+      .isDecimal({ min: 0 })
+      .withMessage("Minimum price must be greater than or equal to 0"),
+    query("maxPrice")
+      .optional()
+      .isDecimal({ min: 0 })
+      .withMessage("Maximum price must be greater than or equal to 0"),
   ],
   async (req, res) => {
     try {
-  // Check for validation errors
-const errors = validationResult(req);
-if (!errors.isEmpty()) {
-  const formattedErrors = errors.array().reduce((acc, err) => {
-    acc[err.path] = err.msg;
-    return acc;
-  }, {});
-  return res.status(400).json({ message: "Bad Request", errors: formattedErrors });
-}
-
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().reduce((acc, err) => {
+          acc[err.path] = err.msg;
+          return acc;
+        }, {});
+        return res
+          .status(400)
+          .json({ message: "Bad Request", errors: formattedErrors });
+      }
 
       // Extract validated query parameters with default values
       const {
@@ -476,40 +500,43 @@ if (!errors.isEmpty()) {
         include: [{ model: SpotImage }],
       });
 
-
       // Slice the spots based on the requested page and size
       const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
 
-      const filteredResponse = await Promise.all(paginatedSpots.map(async (spot) => {
-        // Fetch all reviews for the spot
-        const reviews = await Review.findAll({ where: { spotId: spot.id } });
+      const filteredResponse = await Promise.all(
+        paginatedSpots.map(async (spot) => {
+          // Fetch all reviews for the spot
+          const reviews = await Review.findAll({ where: { spotId: spot.id } });
 
-        // Calculate average rating for the spot
-        const averageRating = reviews.length > 0
-          ? reviews.reduce((sum, review) => sum + review.stars, 0) / reviews.length
-          : null;
+          // Calculate average rating for the spot
+          const averageRating =
+            reviews.length > 0
+              ? reviews.reduce((sum, review) => sum + review.stars, 0) /
+                reviews.length
+              : null;
 
-        return {
-          id: spot.id,
-          ownerId: spot.ownerId,
-          address: spot.address,
-          city: spot.city,
-          state: spot.state,
-          country: spot.country,
-          lat: spot.lat,
-          lng: spot.lng,
-          name: spot.name,
-          description: spot.description,
-          price: spot.price,
-          avgRating: averageRating,
-          previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
-        };
-      }));
+          return {
+            id: spot.id,
+            ownerId: spot.ownerId,
+            address: spot.address,
+            city: spot.city,
+            state: spot.state,
+            country: spot.country,
+            lat: spot.lat,
+            lng: spot.lng,
+            name: spot.name,
+            description: spot.description,
+            price: spot.price,
+            avgRating: averageRating,
+            previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
+          };
+        })
+      );
 
       return res.json({
         Spots: filteredResponse,
         page: page,
-        size: size
+        size: size,
       });
     } catch (error) {
       console.error(error);
@@ -526,12 +553,31 @@ router.post(
     body("review").notEmpty().withMessage("Review text is required"),
     body("stars")
       .notEmpty()
+      .isInt({ min: 1, max: 5 })
       .withMessage("Stars must be an integer from 1 to 5"),
   ],
   async (req, res, next) => {
-    const { review, stars } = req.body;
-
     try {
+      const { review, stars } = req.body;
+
+      // Handle validation response
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().map((err) => err.msg);
+
+        const fieldNames = ["review", "stars"];
+        const errorsObject = {};
+
+        for (let i = 0; i < fieldNames.length; i++) {
+          errorsObject[fieldNames[i]] = formattedErrors[i];
+        }
+
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: errorsObject,
+        });
+      }
+
       const spot = await Spot.findByPk(req.params.spotId, {
         include: [
           {
@@ -547,6 +593,21 @@ router.post(
         });
       }
 
+      // checks if userId exists in Reviews table
+      if (spot.Reviews.some((review) => review.userId === req.user.id)) {
+        return res.status(500).json({
+          message: "User already has a review for this spot",
+        });
+      }
+
+      // Check if stars are within the allowed range
+      if (stars < 1 || stars > 5) {
+        return res.status(400).json({
+          message: "Bad Request",
+          errors: ["Stars must be an integer from 1 to 5"],
+        });
+      }
+
       const newReview = await spot.createReview({
         userId: req.user.id,
         spotId: req.params.spotId,
@@ -554,25 +615,12 @@ router.post(
         stars,
       });
 
-      // checks if userId exist in Reviews table
-      if (spot.Reviews.some((review) => review.userId === req.user.id)) {
-        return res.status(500).json({
-          message: "User already has a review for this spot",
-        });
-      }
-
       return res.status(201).json(newReview);
     } catch (error) {
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: {
-            "review": "Review text is required",
-            "stars": "Stars must be an integer from 1 to 5",
-          },
-        });
-      }
+      console.error(error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
+  }
 );
 
 // Post a spot
@@ -599,14 +647,31 @@ router.post(
       .withMessage("Price per day must be a positive number"),
   ],
   async (req, res, next) => {
+    // Validate input parameters
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map((err) => err.msg);
+
+      const fieldNames = [
+        "address",
+        "city",
+        "state",
+        "country",
+        "lat",
+        "lng",
+        "name",
+        "description",
+        "price",
+      ];
+      const errorsObject = {};
+
+      for (let i = 0; i < fieldNames.length; i++) {
+        errorsObject[fieldNames[i]] = formattedErrors[i];
+      }
+
       return res.status(400).json({
         message: "Bad Request",
-        errors: errors.array().reduce((acc, err) => {
-          acc[err.param] = err.msg;
-          return acc;
-        }, {}),
+        errors: errorsObject,
       });
     }
 
@@ -649,7 +714,7 @@ router.post(
         description: newSpot.description,
         price: newSpot.price,
         createdAt: newSpot.createdAt,
-        updatedAt: newSpot.updatedAt
+        updatedAt: newSpot.updatedAt,
       };
 
       return res.status(201).json(filteredNewSpot);
@@ -735,12 +800,6 @@ router.put(
       if (spot.ownerId !== req.user.id) {
         return res.status(401).json({
           message: "Forbidden",
-        });
-      }
-
-      if (!spot) {
-        return res.status(404).json({
-          message: "Spot couldn't be found",
         });
       }
 
