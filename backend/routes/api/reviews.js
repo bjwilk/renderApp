@@ -101,8 +101,8 @@ router.get("/current", requireAuth, async (req, res, next) => {
         reviewId: review.spotId,
         review: review.review,
         stars: review.stars,
-        createdAt: review.createdAt,
-        updatedAt: review.updatedAt,
+        createdAt: formatDate(review.createdAt),
+        updatedAt: formatDate(review.updatedAt),
         User: {
           id: review.User.id,
           firstName: review.User.firstName,

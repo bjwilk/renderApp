@@ -55,8 +55,8 @@ router.get("/current", requireAuth, async (req, res, next) => {
       userId: booking.userId,
       startDate: booking.startDate,
       endDate: booking.endDate,
-      createdAt: booking.createdAt,
-      updatedAt: booking.updatedAt,
+      createdAt: formatDate(booking.createdAt),
+      updatedAt: formatDate(booking.updatedAt),
     }));
 
     return res.json({

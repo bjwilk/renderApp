@@ -123,8 +123,8 @@ router.get("/:spotId/reviews", async (req, res, next) => {
       spotId: review.spotId,
       review: review.review,
       stars: review.stars,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
+      createdAt: formatDate(review.createdAt),
+      updatedAt: formatDate(review.updatedAt),
       User: {
         id: review.User.id,
         firstName: review.User.firstName,
@@ -194,8 +194,8 @@ router.get("/:spotId", async (req, res, next) => {
       name: spotInfo.name,
       description: spotInfo.description,
       price: spotInfo.price,
-      createdAt: spotInfo.createdAt,
-      updatedAt: spotInfo.updatedAt,
+      createdAt: formatDate(spotInfo.createdAt),
+      updatedAt: formatDate(spotInfo.updatedAt),
       numReviews: numReviews,
       avgStarRating: avgStarRating,
       SpotImages: spotInfo.SpotImages.map((image) => ({
@@ -244,8 +244,8 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
         userId: booking.userId,
         startDate: booking.startDate,
         endDate: booking.endDate,
-        createdAt: booking.createdAt,
-        updatedAt: booking.updatedAt,
+        createdAt: formatDate(booking.createdAt),
+        updatedAt: formatDate(booking.updatedAt),
       }));
 
       const notUserBookings = formattedBookings.map((booking) => ({
