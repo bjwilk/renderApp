@@ -35,7 +35,7 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
 
   // Checks if authorized
   if(reviewImage.Review.userId !== req.user.id){
-    return res.json({
+    return res.status(403).json({
       message: "Forbidden"
     })
   }

@@ -12,11 +12,11 @@ const router = express.Router();
 
 const validateSignup = [
   check("firstName")
-  .exists({ checkFalsy: true })
-  .withMessage("Please provide a firstName."),
+    .exists({ checkFalsy: true })
+    .withMessage("Please provide a firstName."),
   check("lastName")
-  .exists({ checkFalsy: true })
-  .withMessage("Please provide a lastName."),
+    .exists({ checkFalsy: true })
+    .withMessage("Please provide a lastName."),
   check("email")
     .exists({ checkFalsy: true })
     .isEmail()
@@ -37,7 +37,6 @@ router.get("/", async (req, res) => {
   const users = await User.findAll();
   return res.json(users);
 });
-
 
 // Sign up
 router.post("/", validateSignup, async (req, res) => {
@@ -65,18 +64,14 @@ router.post("/", validateSignup, async (req, res) => {
       user: safeUser,
     });
   } catch (error) {
-    // Check if the error is a Sequelize validation error
-    // name: 'SequelizeUniqueConstraintError',
-    // errors: [
-    //   ValidationErrorItem {
-    //     message: 'email must be unique',
-    //     type: 'unique violation',
-    //     path: 'email',
-    
-    if (error.name === 'SequelizeUniqueConstraintError') {
+    if (error.name === "SequelizeUniqueConstraintError") {
       const errors = {};
       error.errors.forEach((err) => {
-        errors[err.path] = err.message;
+        if (err.path === "username") {
+          errors[err.path] = "User with that username already exists";
+        } else if (err.path === "email") {
+          errors[err.path] = "User with that email already exists";
+        }
       });
 
       const response = {
@@ -87,9 +82,8 @@ router.post("/", validateSignup, async (req, res) => {
       return res.status(500).json(response);
     }
     console.error(error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
 
 module.exports = router;

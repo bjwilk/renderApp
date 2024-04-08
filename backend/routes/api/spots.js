@@ -24,6 +24,8 @@ const setDefaultValues = (req, res, next) => {
   next(); // Call the next middleware or route handler
 };
 
+const { formatDate } = require('../../utils/dateFormateFunc')
+
 // Get all spots for current user
 router.get("/current", requireAuth, async (req, res, next) => {
   try {
@@ -288,31 +290,34 @@ router.post(
   [
     body("startDate")
       .notEmpty()
-      .withMessage("startDate cannot be in the past")
+      .withMessage("startDate cannot be empty")
       .custom((value, { req }) => {
-        // Custom validation to check if startDate is not in the past
         const currentDate = new Date();
         const selectedStartDate = new Date(value);
+
 
         if (selectedStartDate < currentDate) {
           throw new Error("startDate cannot be in the past");
         }
-        return value;
-      }),
-    body("endDate")
-      .notEmpty()
-      .withMessage("endDate cannot be on or before startDate")
-      .custom((value, { req }) => {
-        // Custom validation to check if endDate is not before startDate
-        const selectedEndDate = new Date(value);
-        const selectedStartDate = new Date(req.body.startDate);
 
-        if (selectedEndDate <= selectedStartDate) {
-          throw new Error("endDate cannot be on or before startDate");
-        }
-
-        return value;
+        return true;
       }),
+      body("endDate")
+        .notEmpty()
+        .withMessage("endDate cannot be empty")
+        .custom((value, { req }) => {
+          const currentDate = new Date();
+          const selectedEndDate = new Date(value);
+          const selectedStartDate = new Date(req.body.startDate);
+
+          if (selectedEndDate <= selectedStartDate) {
+            throw new Error("endDate cannot be on or before startDate");
+          } else if (selectedEndDate < currentDate){
+            throw new Error("endDate cannot be in the past")
+          }
+
+          return true;
+        }),
   ],
   async (req, res, next) => {
     const { spotId } = req.params;
@@ -326,23 +331,21 @@ router.post(
         });
       }
 
-      if(spot.ownerId === req.user.id){
-        return res.status(403).json( {
-          message: "Spot must NOT belong to the current user."
-        })
+      if (spot.ownerId === req.user.id) {
+        return res.status(403).json({
+          message: "Spot must NOT belong to the current user.",
+        });
       }
 
       // Validate input parameters
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map((err) => err.msg);
-
-        const fieldNames = ["startDate", "endDate"];
+        const errorsArray = errors.array();
         const errorsObject = {};
 
-        for (let i = 0; i < fieldNames.length; i++) {
-          errorsObject[fieldNames[i]] = formattedErrors[i];
-        }
+        errorsArray.forEach((error) => {
+          errorsObject[error.path] = error.msg;
+        });
 
         return res.status(400).json({
           message: "Bad Request",
@@ -378,6 +381,33 @@ router.post(
         };
 
         if (
+          // Dates surrounding existing booking
+          (new Date(startDate).toISOString().split("T")[0] <
+            new Date(booking.dataValues.startDate)
+              .toISOString()
+              .split("T")[0] &&
+            new Date(endDate).toISOString().split("T")[0] >
+              new Date(booking.dataValues.endDate)
+                .toISOString()
+                .split("T")[0]) ||
+          // Dates within existing booking
+          (new Date(startDate).toISOString().split("T")[0] >=
+            new Date(booking.dataValues.startDate)
+              .toISOString()
+              .split("T")[0] &&
+            new Date(endDate).toISOString().split("T")[0] <=
+              new Date(booking.dataValues.endDate).toISOString().split("T")[0])
+        ) {
+          return res.status(403).json({
+            message:
+              "Sorry, this spot is already booked for the specified dates",
+            errors: {
+              startDate: "Start date conflicts with an existing booking",
+              endDate: "End date conflicts with an existing booking",
+              conflictingBooking: conflictingBooking,
+            },
+          });
+        } else if (
           new Date(startDate).toISOString().split("T")[0] >=
             new Date(booking.dataValues.startDate)
               .toISOString()
@@ -409,25 +439,6 @@ router.post(
             errors: {
               endDate: "End date conflicts with an existing booking",
               conflictingBooking: conflictingBooking,
-
-            },
-          });
-        } else if (
-          new Date(startDate).toISOString().split("T")[0] <=
-            new Date(booking.dataValues.startDate)
-              .toISOString()
-              .split("T")[0] &&
-          new Date(endDate).toISOString().split("T")[0] >=
-            new Date(booking.dataValues.endDate).toISOString().split("T")[0]
-        ) {
-          // Conflict with end date
-          return res.status(403).json({
-            message:
-              "Sorry, this spot is already booked for the specified dates",
-            errors: {
-              startDate: "Start date conflicts with an existing booking",
-              endDate: "End date conflicts with an existing booking",
-              conflictingBooking: conflictingBooking,
             },
           });
         }
@@ -446,8 +457,8 @@ router.post(
         userId: newBooking.userId,
         startDate: newBooking.startDate,
         endDate: newBooking.endDate,
-        createdAt: newBooking.createdAt,
-        updatedAt: newBooking.updatedAt,
+        createdAt: formatDate(newBooking.createdAt),
+        updatedAt: formatDate(newBooking.updatedAt),
       };
 
       return res.json(formattedResponse);
@@ -638,7 +649,17 @@ router.post(
         stars,
       });
 
-      return res.status(201).json(newReview);
+      const filteredReview = {
+        id: newReview.id,
+        userId: newReview.userId,
+        spotId: newReview.spotId,
+        review: newReview.review,
+        stars: newReview.starts,
+        createdAt: formatDate(newReview.createdAt),
+        updatedAt: formatDate(newReview.updatedAt)
+      }
+
+      return res.status(201).json(filteredReview);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -662,10 +683,8 @@ router.post(
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")
-      .notEmpty()
-      .withMessage("Name must be less than 50 characters")
       .isLength({ min: 1, max: 50 })
-      .withMessage("Name must be less than 50 characters"),
+      .withMessage("Name must be between 1 and 50 characters"),
     body("description").notEmpty().withMessage("Description is required"),
     body("price")
       .isFloat({ gt: 0 })
@@ -675,25 +694,13 @@ router.post(
     // Validate input parameters
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const formattedErrors = errors.array().map((err) => err.msg);
-
-      const fieldNames = [
-        "address",
-        "city",
-        "state",
-        "country",
-        "lat",
-        "lng",
-        "name",
-        "description",
-        "price",
-      ];
+      const errorsArray = errors.array();
       const errorsObject = {};
 
-      for (let i = 0; i < fieldNames.length; i++) {
-        errorsObject[fieldNames[i]] = formattedErrors[i];
-      }
-      console.log(errorsObject);
+      errorsArray.forEach((error) => {
+        errorsObject[error.path] = error.msg;
+      });
+
       return res.status(400).json({
         message: "Bad Request",
         errors: errorsObject,
@@ -738,8 +745,8 @@ router.post(
         name: newSpot.name,
         description: newSpot.description,
         price: newSpot.price,
-        createdAt: newSpot.createdAt,
-        updatedAt: newSpot.updatedAt,
+        createdAt: formatDate(newSpot.createdAt),
+        updatedAt: formatDate(newSpot.updatedAt),
       };
 
       return res.status(201).json(filteredNewSpot);
@@ -803,15 +810,14 @@ router.put(
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")
-      .notEmpty()
-      .withMessage("Name must be less than 50 characters")
       .isLength({ min: 1, max: 50 })
-      .withMessage("Name must be less than 50 characters"),
+      .withMessage("Name must be between 1 and 50 characters"),
     body("description").notEmpty().withMessage("Description is required"),
     body("price")
       .isFloat({ gt: 0 })
       .withMessage("Price per day must be a positive number"),
   ],
+
   async (req, res) => {
     const { spotId } = req.params;
     const {
@@ -826,11 +832,27 @@ router.put(
       price,
     } = req.body;
 
+    // Validate input parameters
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorsArray = errors.array();
+      const errorsObject = {};
+
+      errorsArray.forEach((error) => {
+        errorsObject[error.path] = error.msg;
+      });
+
+      return res.status(400).json({
+        message: "Bad Request",
+        errors: errorsObject,
+      });
+    }
+
     try {
       // Check if the spot with the specified ID exists
       const spot = await Spot.findByPk(spotId);
-      if (spot.Booking.userId !== req.user.id) {
-        return res.status(401).json({
+      if (spot.ownerId !== req.user.id) {
+        return res.status(403).json({
           message: "Forbidden",
         });
       }
@@ -865,6 +887,7 @@ router.put(
 
       // Update the spot
       await spot.update({
+        ownerId: req.user.id,
         address,
         city,
         state,
@@ -876,14 +899,29 @@ router.put(
         price,
       });
 
-      return res.status(200).json(spot);
+      const filteredNewSpot = {
+        id: spot.id,
+        ownerId: spot.ownerId,
+        address: spot.address,
+        city: spot.city,
+        state: spot.state,
+        country: spot.country,
+        lat: spot.lat,
+        lng: spot.lng,
+        name: spot.name,
+        description: spot.description,
+        price: spot.price,
+        createdAt: formatDate(spot.createdAt),
+        updatedAt: formatDate(spot.updatedAt),
+      };
+
+      return res.status(200).json(filteredNewSpot);
     } catch (error) {
       console.error(error);
       return res.status(404).json({ message: "Spot couldn't be found" });
     }
   }
 );
-
 // DELETE route to delete an existing spot
 router.delete("/:spotId", requireAuth, async (req, res) => {
   const { spotId } = req.params;

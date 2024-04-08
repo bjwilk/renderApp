@@ -19,8 +19,10 @@ const {
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const { body, validationResult } = require("express-validator");
+const { formatDate } = require("../../utils/dateFormateFunc");
 
 const router = express.Router();
+
 
 // Get all reviews by current user  if userId === req.user.id
 router.get("/current", requireAuth, async (req, res, next) => {
@@ -132,7 +134,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
 
     // Error is review does not belong to user
     if (review.userId !== req.user.id) {
-      return res.status(401).json({
+      return res.status(403).json({
         message: "Forbidden",
       });
     }
@@ -216,7 +218,17 @@ router.put(
         stars,
       });
 
-      return res.status(200).json(userReview);
+      const filteredUserReview = {
+        id: userReview.id,
+        userId: userReview.userId,
+        spotId: userReview.spotId,
+        review: userReview.review,
+        stars: userReview.stars,
+        createdAt: formatDate(userReview.createdAt),
+        updatedAt: formatDate(userReview.updatedAt)
+      }
+
+      return res.status(200).json(filteredUserReview);
     } catch (error) {
       console.error(error);
       return res.status(500).json({
