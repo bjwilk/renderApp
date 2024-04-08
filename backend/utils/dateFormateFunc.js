@@ -3,8 +3,8 @@
 function formatDate(dateTimeString) {
     const date = new Date(dateTimeString);
 
-    // Adjust to Pacific Standard Time (PST) by subtracting 8 hours (in milliseconds)
-    const pstDate = new Date(date.getTime() - (8 * 60 * 60 * 1000));
+    // Adjust to Pacific Standard Time (PST) by subtracting 7 hours (in milliseconds)
+    const pstDate = new Date(date.getTime() - (7 * 60 * 60 * 1000));
 
     const year = pstDate.getFullYear();
     const month = String(pstDate.getMonth() + 1).padStart(2, '0');
