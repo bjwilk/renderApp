@@ -180,7 +180,7 @@ router.get("/:spotId", async (req, res, next) => {
       (sum, review) => sum + review.stars,
       0
     );
-    const avgStarRating = numReviews > 0 ? totalStars / numReviews : 0;
+    const avgStarRating = numReviews > 0 ? totalStars / numReviews : null;
 
     const formattedResponse = {
       id: spotInfo.id,
