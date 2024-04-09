@@ -54,6 +54,8 @@ router.get("/current", requireAuth, async (req, res, next) => {
           name: spot.name,
           description: spot.description,
           price: spot.price,
+          createdAt: formatDate(spot.createdAt),
+          updatedAt: formatDate(spot.updatedAt)
         };
 
         // Fetch all reviews for the spot
@@ -569,6 +571,8 @@ router.get(
             name: spot.name,
             description: spot.description,
             price: spot.price,
+            createdAt: formatDate(spot.createdAt),
+            updatedAt: formatDate(spot.updatedAt),
             avgRating: averageRating,
             previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
           };
