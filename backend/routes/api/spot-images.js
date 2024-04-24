@@ -9,6 +9,7 @@ const {
   requireAuth,
 } = require("../../utils/auth");
 const { User, Spot, SpotImage } = require("../../db/models");
+const { forbidden } = require("../../utils/errorResponse")
 
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
@@ -35,9 +36,7 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
 
   // Checks for authorization
   if(spotImage.Spot.ownerId !== req.user.id){
-    return res.status(403).json({
-      message: "Forbidden"
-    })
+    return forbidden(res)
   }
 
   await spotImage.destroy();

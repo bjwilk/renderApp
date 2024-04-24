@@ -13,6 +13,7 @@ const { User, Spot, Booking, SpotImage } = require("../../db/models");
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const { formatDate } = require("../../utils/dateFormateFunc");
+const { forbidden } = require("../../utils/errorResponse");
 
 const router = express.Router();
 
@@ -113,9 +114,7 @@ router.put(
       const currentDate = new Date();
 
       if (booking.userId !== req.user.id) {
-        return res.status(403).json({
-          message: "Forbidden",
-        });
+        return forbidden(res)
       }
 
       if (
@@ -278,9 +277,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   }
 
   if (deleteBooking.userId !== req.user.id) {
-    return res.status(403).json({
-      message: "Forbidden",
-    });
+    return forbidden(res)
   }
 
   // Custom validation to check if startDate has not been started

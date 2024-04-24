@@ -12,6 +12,7 @@ const { User, Spot, ReviewImage, Review } = require("../../db/models");
 
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
+const { forbidden } = require("../../utils/errorResponse");
 
 const router = express.Router();
 
@@ -35,9 +36,7 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
 
   // Checks if authorized
   if(reviewImage.Review.userId !== req.user.id){
-    return res.status(403).json({
-      message: "Forbidden"
-    })
+    return forbidden(res)
   }
 
   await reviewImage.destroy();

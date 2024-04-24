@@ -20,6 +20,7 @@ const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const { body, validationResult } = require("express-validator");
 const { formatDate } = require("../../utils/dateFormateFunc");
+const { forbidden } = require("../../utils/errorResponse");
 
 const router = express.Router();
 
@@ -134,9 +135,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
 
     // Error is review does not belong to user
     if (review.userId !== req.user.id) {
-      return res.status(403).json({
-        message: "Forbidden",
-      });
+      return forbidden(res)
     }
 
     if (review.ReviewImages.length >= 10) {
@@ -188,9 +187,7 @@ router.put(
       }
 
       if (userReview.userId !== req.user.id) {
-        return res.status(403).json({
-          message: "Forbidden",
-        });
+        return forbidden(res)
       }
 
           // Validate input parameters
@@ -244,9 +241,7 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     const deletedReview = await Review.findByPk(req.params.reviewId);
 
     if (deletedReview.userId !== req.user.id) {
-      return res.status(403).json({
-        message: "Forbidden",
-      });
+      return forbidden(res)
     }
 
     await deletedReview.destroy();

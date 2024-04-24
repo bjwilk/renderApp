@@ -4,7 +4,7 @@ const { Op, ValidationError } = require("sequelize");
 const bcrypt = require("bcryptjs");
 
 const { requireAuth, setTokenCookie } = require("../../utils/auth");
-
+const { forbidden } = require("../../utils/errorResponse")
 const {
   User,
   Spot,
@@ -778,9 +778,7 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
 
     // Check if user owns spot
     if (spot.ownerId !== req.user.id) {
-      return res.status(403).json({
-        message: "Forbidden",
-      });
+      return forbidden(res);
     }
 
     // Create a new image for the spot
@@ -862,9 +860,7 @@ router.put(
       // Check if the spot with the specified ID exists
       const spot = await Spot.findByPk(spotId);
       if (spot.ownerId !== req.user.id) {
-        return res.status(403).json({
-          message: "Forbidden",
-        });
+        return forbidden(res)
       }
 
       // Validate input parameters
@@ -945,9 +941,7 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
         message: "Spot couldn't be found",
       });
     } else if (spot.ownerId !== req.user.id) {
-      return res.status(403).json({
-        message: "Forbidden",
-      });
+      return forbidden(res)
     }
 
     // Delete the spot
