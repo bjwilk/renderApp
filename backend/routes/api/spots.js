@@ -4,6 +4,7 @@ const { Op, ValidationError } = require("sequelize");
 const bcrypt = require("bcryptjs");
 
 const { requireAuth, setTokenCookie } = require("../../utils/auth");
+
 const {
   User,
   Spot,
@@ -22,6 +23,14 @@ const setDefaultValues = (req, res, next) => {
   req.query.page = req.query.page || 1; // Default value for page parameter
   req.query.size = req.query.size || 20; // Default value for size parameter
   next(); // Call the next middleware or route handler
+};
+
+const isNumericInRange = (value, min, max) => {
+  if (isNaN(value)) {
+    return false; // Not a number
+  }
+  const numericValue = parseFloat(value);
+  return numericValue >= min && numericValue <= max;
 };
 
 const { formatDate } = require('../../utils/dateFormateFunc')
@@ -470,6 +479,7 @@ router.post(
     }
   }
 );
+
 // Get all spots
 router.get(
   "/",
@@ -485,43 +495,39 @@ router.get(
       .withMessage("Size must be between 1 and 20"),
     query("minLat")
       .optional()
-      .isDecimal({ decimal_digits: "0,6" })
+      .custom((value) =>
+        isNumericInRange(value, -90, 90)
+      )
       .withMessage("Latitude must be a valid number between -90 and 90"),
     query("maxLat")
       .optional()
-      .isDecimal({ decimal_digits: "0,6" })
+      .custom((value) =>
+        isNumericInRange(value, -90, 90)
+      )
       .withMessage("Latitude must be a valid number between -90 and 90"),
     query("minLng")
       .optional()
-      .isDecimal({ decimal_digits: "0,6" })
+      .custom((value) =>
+        isNumericInRange(value, -180, 180)
+      )
       .withMessage("Longitude must be a valid number between -180 and 180"),
     query("maxLng")
       .optional()
-      .isDecimal({ decimal_digits: "0,6" })
+      .custom((value) =>
+        isNumericInRange(value, -180, 180)
+      )
       .withMessage("Longitude must be a valid number between -180 and 180"),
     query("minPrice")
       .optional()
-      .isDecimal({ min: 0 })
+      .isInt({ min: 0 })
       .withMessage("Minimum price must be greater than or equal to 0"),
     query("maxPrice")
       .optional()
-      .isDecimal({ min: 0 })
+      .isInt({ min: 0 })
       .withMessage("Maximum price must be greater than or equal to 0"),
-  ],
+  ], handleValidationErrors,
   async (req, res) => {
     try {
-      // Check for validation errors
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().reduce((acc, err) => {
-          acc[err.path] = err.msg;
-          return acc;
-        }, {});
-        return res
-          .status(400)
-          .json({ message: "Bad Request", errors: formattedErrors });
-      }
-
       // Extract validated query parameters with default values
       const {
         page = 1,
