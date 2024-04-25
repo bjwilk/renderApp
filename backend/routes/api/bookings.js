@@ -12,8 +12,7 @@ const { User, Spot, Booking, SpotImage } = require("../../db/models");
 
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
-const { formatDate } = require("../../utils/dateFormateFunc");
-const { forbidden } = require("../../utils/errorResponse");
+const { forbidden, formatDate, deleted } = require("../../utils/helperFunctions");
 
 const router = express.Router();
 
@@ -69,7 +68,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
   }
 });
 
-// Update booking
+// Update booking by id
 router.put(
   "/:bookingId",
   requireAuth,
@@ -260,7 +259,7 @@ router.put(
   }
 );
 
-// Delete booking
+// Delete booking by id
 router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   const deleteBooking = await Booking.findByPk(req.params.bookingId, {
     include: [
@@ -298,9 +297,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   }
 
   await deleteBooking.destroy();
-  return res.status(200).json({
-    message: "Successfully deleted",
-  });
+  return deleted(res)
 });
 
 module.exports = router;

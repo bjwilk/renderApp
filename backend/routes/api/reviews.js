@@ -19,8 +19,7 @@ const {
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const { body, validationResult } = require("express-validator");
-const { formatDate } = require("../../utils/dateFormateFunc");
-const { forbidden } = require("../../utils/errorResponse");
+const { forbidden, formatDate, deleted } = require("../../utils/helperFunctions");
 
 const router = express.Router();
 
@@ -123,7 +122,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
   }
 });
 
-// POST image to review
+// POST image to review by id
 router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   const { url } = req.body;
 
@@ -245,9 +244,7 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     }
 
     await deletedReview.destroy();
-    return res.status(200).json({
-      message: "Successfully deleted",
-    });
+    return deleted(res)
   } catch (error) {
     console.error(error);
     return res.status(404).json({

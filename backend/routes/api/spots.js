@@ -4,7 +4,15 @@ const { Op, ValidationError } = require("sequelize");
 const bcrypt = require("bcryptjs");
 
 const { requireAuth, setTokenCookie } = require("../../utils/auth");
-const { forbidden } = require("../../utils/errorResponse")
+
+const {
+  forbidden,
+  formatDate,
+  isNumericInRange,
+  setDefaultValues,
+  deleted,
+} = require("../../utils/helperFunctions");
+
 const {
   User,
   Spot,
@@ -18,22 +26,6 @@ const { handleValidationErrors } = require("../../utils/validation");
 const { body, validationResult, query } = require("express-validator");
 
 const router = express.Router();
-
-const setDefaultValues = (req, res, next) => {
-  req.query.page = req.query.page || 1; // Default value for page parameter
-  req.query.size = req.query.size || 20; // Default value for size parameter
-  next(); // Call the next middleware or route handler
-};
-
-const isNumericInRange = (value, min, max) => {
-  if (isNaN(value)) {
-    return false; // Not a number
-  }
-  const numericValue = parseFloat(value);
-  return numericValue >= min && numericValue <= max;
-};
-
-const { formatDate } = require('../../utils/dateFormateFunc')
 
 // Get all spots for current user
 router.get("/current", requireAuth, async (req, res, next) => {
@@ -64,7 +56,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
           description: spot.description,
           price: spot.price,
           createdAt: formatDate(spot.createdAt),
-          updatedAt: formatDate(spot.updatedAt)
+          updatedAt: formatDate(spot.updatedAt),
         };
 
         // Fetch all reviews for the spot
@@ -306,29 +298,28 @@ router.post(
         const currentDate = new Date();
         const selectedStartDate = new Date(value);
 
-
         if (selectedStartDate < currentDate) {
           throw new Error("startDate cannot be in the past");
         }
 
         return true;
       }),
-      body("endDate")
-        .notEmpty()
-        .withMessage("endDate cannot be empty")
-        .custom((value, { req }) => {
-          const currentDate = new Date();
-          const selectedEndDate = new Date(value);
-          const selectedStartDate = new Date(req.body.startDate);
+    body("endDate")
+      .notEmpty()
+      .withMessage("endDate cannot be empty")
+      .custom((value, { req }) => {
+        const currentDate = new Date();
+        const selectedEndDate = new Date(value);
+        const selectedStartDate = new Date(req.body.startDate);
 
-          if (selectedEndDate <= selectedStartDate) {
-            throw new Error("endDate cannot be on or before startDate");
-          } else if (selectedEndDate < currentDate){
-            throw new Error("endDate cannot be in the past")
-          }
+        if (selectedEndDate <= selectedStartDate) {
+          throw new Error("endDate cannot be on or before startDate");
+        } else if (selectedEndDate < currentDate) {
+          throw new Error("endDate cannot be in the past");
+        }
 
-          return true;
-        }),
+        return true;
+      }),
   ],
   async (req, res, next) => {
     const { spotId } = req.params;
@@ -495,27 +486,19 @@ router.get(
       .withMessage("Size must be between 1 and 20"),
     query("minLat")
       .optional()
-      .custom((value) =>
-        isNumericInRange(value, -90, 90)
-      )
+      .custom((value) => isNumericInRange(value, -90, 90))
       .withMessage("Latitude must be a valid number between -90 and 90"),
     query("maxLat")
       .optional()
-      .custom((value) =>
-        isNumericInRange(value, -90, 90)
-      )
+      .custom((value) => isNumericInRange(value, -90, 90))
       .withMessage("Latitude must be a valid number between -90 and 90"),
     query("minLng")
       .optional()
-      .custom((value) =>
-        isNumericInRange(value, -180, 180)
-      )
+      .custom((value) => isNumericInRange(value, -180, 180))
       .withMessage("Longitude must be a valid number between -180 and 180"),
     query("maxLng")
       .optional()
-      .custom((value) =>
-        isNumericInRange(value, -180, 180)
-      )
+      .custom((value) => isNumericInRange(value, -180, 180))
       .withMessage("Longitude must be a valid number between -180 and 180"),
     query("minPrice")
       .optional()
@@ -525,7 +508,8 @@ router.get(
       .optional()
       .isInt({ min: 0 })
       .withMessage("Maximum price must be greater than or equal to 0"),
-  ], handleValidationErrors,
+  ],
+  handleValidationErrors,
   async (req, res) => {
     try {
       // Extract validated query parameters with default values
@@ -666,8 +650,8 @@ router.post(
         review: newReview.review,
         stars: newReview.starts,
         createdAt: formatDate(newReview.createdAt),
-        updatedAt: formatDate(newReview.updatedAt)
-      }
+        updatedAt: formatDate(newReview.updatedAt),
+      };
 
       return res.status(201).json(filteredReview);
     } catch (error) {
@@ -767,7 +751,7 @@ router.post(
   }
 );
 
-// POST create a new image for a spot
+// POST create a new image for a spot by id
 router.post("/:spotId/images", requireAuth, async (req, res) => {
   const { spotId } = req.params;
   const { url, preview } = req.body;
@@ -802,7 +786,7 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
   }
 });
 
-// PUT edit existing spot
+// PUT edit existing spot by id
 router.put(
   "/:spotId",
   requireAuth,
@@ -860,7 +844,7 @@ router.put(
       // Check if the spot with the specified ID exists
       const spot = await Spot.findByPk(spotId);
       if (spot.ownerId !== req.user.id) {
-        return forbidden(res)
+        return forbidden(res);
       }
 
       // Validate input parameters
@@ -928,7 +912,7 @@ router.put(
     }
   }
 );
-// DELETE route to delete an existing spot
+// DELETE spot by id
 router.delete("/:spotId", requireAuth, async (req, res) => {
   const { spotId } = req.params;
 
@@ -941,15 +925,13 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
         message: "Spot couldn't be found",
       });
     } else if (spot.ownerId !== req.user.id) {
-      return forbidden(res)
+      return forbidden(res);
     }
 
     // Delete the spot
     await spot.destroy();
 
-    return res.status(200).json({
-      message: "Successfully deleted",
-    });
+    return deleted(res);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Could not delete the spot" });

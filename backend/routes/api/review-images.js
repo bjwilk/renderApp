@@ -12,11 +12,11 @@ const { User, Spot, ReviewImage, Review } = require("../../db/models");
 
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
-const { forbidden } = require("../../utils/errorResponse");
+const { forbidden, deleted} = require("../../utils/helperFunctions");
 
 const router = express.Router();
 
-//Delete a Review Image
+//Delete a Review Image by id
 router.delete("/:imageId", requireAuth, async (req, res, next) => {
   const reviewImage = await ReviewImage.findByPk(req.params.imageId, {
     include: [
@@ -41,9 +41,7 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
 
   await reviewImage.destroy();
 
-  return res.json({
-    message: "Successfully deleted",
-  });
+  return deleted(res)
 });
 
 module.exports = router;

@@ -9,14 +9,14 @@ const {
   requireAuth,
 } = require("../../utils/auth");
 const { User, Spot, SpotImage } = require("../../db/models");
-const { forbidden } = require("../../utils/errorResponse")
+const { forbidden, deleted } = require("../../utils/helperFunctions")
 
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 
 const router = express.Router();
 
-//Delete a Spot Image
+//Delete a Spot Image by id
 router.delete("/:imageId", requireAuth, async (req, res, next) => {
   const spotImage = await SpotImage.findByPk(req.params.imageId, {
     include: [
@@ -41,9 +41,7 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
 
   await spotImage.destroy();
 
-  return res.json({
-    message: "Successfully deleted",
-  });
+  return deleted(res)
 });
 
 module.exports = router;
