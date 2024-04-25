@@ -23,6 +23,7 @@ const {
   forbidden,
   formatDate,
   deleted,
+  noReview,
 } = require("../../utils/helperFunctions");
 
 const router = express.Router();
@@ -162,7 +163,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     return res.json(sanitizedResponse);
   } catch (error) {
     console.error(error);
-    return res.status(404).json({ message: "Review could not be found" });
+    return noReview(res);
   }
 });
 
@@ -185,9 +186,7 @@ router.put(
       const userReview = await Review.findByPk(reviewId);
 
       if (!userReview) {
-        return res.status(404).json({
-          message: "Review couldn't be found",
-        });
+        return noReview(res);
       }
 
       if (userReview.userId !== req.user.id) {
@@ -233,9 +232,7 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     return deleted(res);
   } catch (error) {
     console.error(error);
-    return res.status(404).json({
-      message: "Review couldn't be found",
-    });
+    return noReview(res);
   }
 });
 module.exports = router;

@@ -16,6 +16,7 @@ const {
   forbidden,
   formatDate,
   deleted,
+  noBooking,
 } = require("../../utils/helperFunctions");
 
 const router = express.Router();
@@ -250,7 +251,7 @@ router.put(
       return res.status(200).json(filteredBooking);
     } catch (error) {
       console.log(error);
-      return res.status(404).json({ message: "Booking couldn't be found" });
+      return noBooking(res);
     }
   }
 );
@@ -266,9 +267,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   });
 
   if (!deleteBooking) {
-    return res.status(404).json({
-      message: "Booking could not be found",
-    });
+    return noBooking(res);
   }
 
   if (deleteBooking.userId !== req.user.id) {

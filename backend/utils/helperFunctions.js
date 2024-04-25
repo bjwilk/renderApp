@@ -10,6 +10,20 @@ function deleted(res) {
   });
 }
 
+function noSpot(res) {
+  return res.status(404).json({
+    message: "Spot couldn't be found",
+  });
+}
+
+function noReview(res) {
+  return res.status(404).json({ message: "Review could not be found" });
+}
+
+function noBooking(res) {
+  return res.status(404).json({ message: "Booking couldn't be found" });
+}
+
 function formatDate(dateTimeString) {
   const date = new Date(dateTimeString);
 
@@ -45,5 +59,8 @@ module.exports = {
   formatDate: formatDate,
   isNumericInRange: isNumericInRange,
   setDefaultValues: setDefaultValues,
-  deleted: deleted
+  deleted: deleted,
+  noSpot: noSpot,
+  noReview: noReview,
+  noBooking: noBooking
 };

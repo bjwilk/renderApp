@@ -11,6 +11,7 @@ const {
   isNumericInRange,
   setDefaultValues,
   deleted,
+  noSpot,
 } = require("../../utils/helperFunctions");
 
 const {
@@ -114,9 +115,7 @@ router.get("/:spotId/reviews", async (req, res, next) => {
     });
 
     if (!spotWithReviews) {
-      return res.status(404).json({
-        message: "Spot could not be found",
-      });
+      return noSpot(res);
     }
 
     // create formatted response
@@ -172,9 +171,7 @@ router.get("/:spotId", async (req, res, next) => {
     });
 
     if (!spotInfo) {
-      return res.status(404).json({
-        message: "Spot could not be found",
-      });
+      return noSpot(res);
     }
 
     // Calculate average star rating
@@ -276,9 +273,7 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
         });
       }
     } else {
-      return res.status(404).json({
-        message: "Spot not found",
-      });
+      return noSpot(res);
     }
   } catch (error) {
     console.error(error);
@@ -329,9 +324,7 @@ router.post(
       const spot = await Spot.findByPk(spotId);
 
       if (!spot) {
-        return res.status(404).json({
-          message: "Spot not found",
-        });
+        return noSpot(res);
       }
 
       if (spot.ownerId === req.user.id) {
@@ -592,9 +585,7 @@ router.post(
       });
 
       if (!spot) {
-        return res.status(404).json({
-          message: "Spot couldn't be found",
-        });
+        return noSpot(res);
       }
 
       // checks if userId exists in Reviews table
@@ -733,9 +724,7 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     return res.status(200).json(formattedResponse);
   } catch (error) {
     console.log(error);
-    return res.status(404).json({
-      message: "Spot couldn't be found",
-    });
+    return noSpot(res);
   }
 });
 
@@ -784,34 +773,6 @@ router.put(
         return forbidden(res);
       }
 
-      // Validate input parameters
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map((err) => err.msg);
-
-        const fieldNames = [
-          "address",
-          "city",
-          "state",
-          "country",
-          "lat",
-          "lng",
-          "name",
-          "description",
-          "price",
-        ];
-        const errorsObject = {};
-
-        for (let i = 0; i < fieldNames.length; i++) {
-          errorsObject[fieldNames[i]] = formattedErrors[i];
-        }
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: errorsObject,
-        });
-      }
-
       // Update the spot
       await spot.update({
         ownerId: req.user.id,
@@ -845,7 +806,7 @@ router.put(
       return res.status(200).json(filteredNewSpot);
     } catch (error) {
       console.error(error);
-      return res.status(404).json({ message: "Spot couldn't be found" });
+      return noSpot(res);
     }
   }
 );
@@ -858,9 +819,7 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
     const spot = await Spot.findByPk(spotId);
 
     if (!spot) {
-      return res.status(404).json({
-        message: "Spot couldn't be found",
-      });
+      return noSpot(res);
     } else if (spot.ownerId !== req.user.id) {
       return forbidden(res);
     }
