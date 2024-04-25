@@ -9,10 +9,9 @@ const {
   requireAuth,
 } = require("../../utils/auth");
 const { User, Spot, SpotImage } = require("../../db/models");
-const { forbidden, deleted } = require("../../utils/helperFunctions")
+const { forbidden, deleted } = require("../../utils/helperFunctions");
 
 const { check, body, validationResult } = require("express-validator");
-const { handleValidationErrors } = require("../../utils/validation");
 
 const router = express.Router();
 
@@ -29,19 +28,18 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
   // Checks if SpotImage belongs to the current User's Spot
   if (!spotImage) {
     return res.status(404).json({
-      message:
-        "SpotImage not found",
+      message: "SpotImage not found",
     });
   }
 
   // Checks for authorization
-  if(spotImage.Spot.ownerId !== req.user.id){
-    return forbidden(res)
+  if (spotImage.Spot.ownerId !== req.user.id) {
+    return forbidden(res);
   }
 
   await spotImage.destroy();
 
-  return deleted(res)
+  return deleted(res);
 });
 
 module.exports = router;

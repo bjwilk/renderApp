@@ -11,8 +11,7 @@ const {
 const { User, Spot, ReviewImage, Review } = require("../../db/models");
 
 const { check, body, validationResult } = require("express-validator");
-const { handleValidationErrors } = require("../../utils/validation");
-const { forbidden, deleted} = require("../../utils/helperFunctions");
+const { forbidden, deleted } = require("../../utils/helperFunctions");
 
 const router = express.Router();
 
@@ -29,19 +28,18 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
   // Checks if reviewImage exist
   if (!reviewImage) {
     return res.status(404).json({
-      message:
-      "Review Image couldn't be found",
+      message: "Review Image couldn't be found",
     });
   }
 
   // Checks if authorized
-  if(reviewImage.Review.userId !== req.user.id){
-    return forbidden(res)
+  if (reviewImage.Review.userId !== req.user.id) {
+    return forbidden(res);
   }
 
   await reviewImage.destroy();
 
-  return deleted(res)
+  return deleted(res);
 });
 
 module.exports = router;

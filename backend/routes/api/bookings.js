@@ -12,7 +12,11 @@ const { User, Spot, Booking, SpotImage } = require("../../db/models");
 
 const { check, body, validationResult } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
-const { forbidden, formatDate, deleted } = require("../../utils/helperFunctions");
+const {
+  forbidden,
+  formatDate,
+  deleted,
+} = require("../../utils/helperFunctions");
 
 const router = express.Router();
 
@@ -50,7 +54,10 @@ router.get("/current", requireAuth, async (req, res, next) => {
         lng: booking.Spot.lng,
         name: booking.Spot.name,
         price: booking.Spot.price,
-        previewImage: booking.Spot.SpotImages.length > 0 ? booking.Spot.SpotImages[0].url : null,
+        previewImage:
+          booking.Spot.SpotImages.length > 0
+            ? booking.Spot.SpotImages[0].url
+            : null,
       },
       userId: booking.userId,
       startDate: booking.startDate,
@@ -80,30 +87,30 @@ router.put(
         const currentDate = new Date();
         const selectedStartDate = new Date(value);
 
-
         if (selectedStartDate < currentDate) {
           throw new Error("startDate cannot be in the past");
         }
 
         return true;
       }),
-      body("endDate")
-        .notEmpty()
-        .withMessage("endDate cannot be empty")
-        .custom((value, { req }) => {
-          const currentDate = new Date();
-          const selectedEndDate = new Date(value);
-          const selectedStartDate = new Date(req.body.startDate);
+    body("endDate")
+      .notEmpty()
+      .withMessage("endDate cannot be empty")
+      .custom((value, { req }) => {
+        const currentDate = new Date();
+        const selectedEndDate = new Date(value);
+        const selectedStartDate = new Date(req.body.startDate);
 
-          if (selectedEndDate <= selectedStartDate) {
-            throw new Error("endDate cannot be on or before startDate");
-          } else if (selectedEndDate < currentDate){
-            throw new Error("endDate cannot be in the past")
-          }
+        if (selectedEndDate <= selectedStartDate) {
+          throw new Error("endDate cannot be on or before startDate");
+        } else if (selectedEndDate < currentDate) {
+          throw new Error("endDate cannot be in the past");
+        }
 
-          return true;
-        }),
+        return true;
+      }),
   ],
+  handleValidationErrors,
   async (req, res) => {
     const { bookingId } = req.params;
     const { startDate, endDate } = req.body;
@@ -113,7 +120,7 @@ router.put(
       const currentDate = new Date();
 
       if (booking.userId !== req.user.id) {
-        return forbidden(res)
+        return forbidden(res);
       }
 
       if (
@@ -125,26 +132,10 @@ router.put(
         });
       }
 
-      // Validate input parameters
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const errorsArray = errors.array();
-        const errorsObject = {};
-
-        errorsArray.forEach((error) => {
-          errorsObject[error.path] = error.msg;
-        });
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: errorsObject,
-        });
-      }
-
       // Check if there are existing bookings for the specified date range
       const existingBookings = await Booking.findAll({
         where: {
-          id: { [Op.ne]: booking.id},
+          id: { [Op.ne]: booking.id },
           spotId: booking.spotId,
           [Op.or]: [
             {
@@ -162,10 +153,9 @@ router.put(
           ],
         },
       });
-      
 
       for (const updateBooking of existingBookings) {
-        console.log(existingBookings)
+        console.log(existingBookings);
         const conflictingBooking = {
           startDate: updateBooking.dataValues.startDate,
           endDate: updateBooking.dataValues.endDate,
@@ -187,7 +177,9 @@ router.put(
               .toISOString()
               .split("T")[0] &&
             new Date(endDate).toISOString().split("T")[0] <=
-              new Date(updateBooking.dataValues.endDate).toISOString().split("T")[0])
+              new Date(updateBooking.dataValues.endDate)
+                .toISOString()
+                .split("T")[0])
         ) {
           return res.status(403).json({
             message:
@@ -204,7 +196,9 @@ router.put(
               .toISOString()
               .split("T")[0] &&
           new Date(startDate).toISOString().split("T")[0] <=
-            new Date(updateBooking.dataValues.endDate).toISOString().split("T")[0]
+            new Date(updateBooking.dataValues.endDate)
+              .toISOString()
+              .split("T")[0]
         ) {
           // Conflict with start date
           return res.status(403).json({
@@ -221,7 +215,9 @@ router.put(
               .toISOString()
               .split("T")[0] &&
           new Date(endDate).toISOString().split("T")[0] <=
-            new Date(updateBooking.dataValues.endDate).toISOString().split("T")[0]
+            new Date(updateBooking.dataValues.endDate)
+              .toISOString()
+              .split("T")[0]
         ) {
           // Conflict with end date
           return res.status(403).json({
@@ -248,8 +244,8 @@ router.put(
         startDate: booking.startDate,
         endDate: booking.endDate,
         createdAt: formatDate(booking.createdAt),
-        updatedAt: formatDate(booking.updatedAt)
-      }
+        updatedAt: formatDate(booking.updatedAt),
+      };
 
       return res.status(200).json(filteredBooking);
     } catch (error) {
@@ -276,7 +272,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   }
 
   if (deleteBooking.userId !== req.user.id) {
-    return forbidden(res)
+    return forbidden(res);
   }
 
   // Custom validation to check if startDate has not been started
@@ -297,7 +293,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   }
 
   await deleteBooking.destroy();
-  return deleted(res)
+  return deleted(res);
 });
 
 module.exports = router;

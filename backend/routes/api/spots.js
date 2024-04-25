@@ -321,6 +321,7 @@ router.post(
         return true;
       }),
   ],
+  handleValidationErrors,
   async (req, res, next) => {
     const { spotId } = req.params;
     const { startDate, endDate } = req.body;
@@ -336,22 +337,6 @@ router.post(
       if (spot.ownerId === req.user.id) {
         return res.status(403).json({
           message: "Spot must NOT belong to the current user.",
-        });
-      }
-
-      // Validate input parameters
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const errorsArray = errors.array();
-        const errorsObject = {};
-
-        errorsArray.forEach((error) => {
-          errorsObject[error.path] = error.msg;
-        });
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: errorsObject,
         });
       }
 
@@ -592,6 +577,7 @@ router.post(
       .isInt({ min: 1, max: 5 })
       .withMessage("Stars must be an integer from 1 to 5"),
   ],
+  handleValidationErrors,
   async (req, res, next) => {
     const { review, stars } = req.body;
 
@@ -608,24 +594,6 @@ router.post(
       if (!spot) {
         return res.status(404).json({
           message: "Spot couldn't be found",
-        });
-      }
-
-      // Handle validation response
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        const formattedErrors = errors.array().map((err) => err.msg);
-
-        const fieldNames = ["review", "stars"];
-        const errorsObject = {};
-
-        for (let i = 0; i < fieldNames.length; i++) {
-          errorsObject[fieldNames[i]] = formattedErrors[i];
-        }
-
-        return res.status(400).json({
-          message: "Bad Request",
-          errors: errorsObject,
         });
       }
 
@@ -684,23 +652,8 @@ router.post(
       .isFloat({ gt: 0 })
       .withMessage("Price per day must be a positive number"),
   ],
+  handleValidationErrors,
   async (req, res, next) => {
-    // Validate input parameters
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const errorsArray = errors.array();
-      const errorsObject = {};
-
-      errorsArray.forEach((error) => {
-        errorsObject[error.path] = error.msg;
-      });
-
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: errorsObject,
-      });
-    }
-
     const {
       address,
       city,
@@ -809,7 +762,7 @@ router.put(
       .isFloat({ gt: 0 })
       .withMessage("Price per day must be a positive number"),
   ],
-
+  handleValidationErrors,
   async (req, res) => {
     const { spotId } = req.params;
     const {
@@ -823,22 +776,6 @@ router.put(
       description,
       price,
     } = req.body;
-
-    // Validate input parameters
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const errorsArray = errors.array();
-      const errorsObject = {};
-
-      errorsArray.forEach((error) => {
-        errorsObject[error.path] = error.msg;
-      });
-
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: errorsObject,
-      });
-    }
 
     try {
       // Check if the spot with the specified ID exists

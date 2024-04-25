@@ -19,10 +19,13 @@ const {
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const { body, validationResult } = require("express-validator");
-const { forbidden, formatDate, deleted } = require("../../utils/helperFunctions");
+const {
+  forbidden,
+  formatDate,
+  deleted,
+} = require("../../utils/helperFunctions");
 
 const router = express.Router();
-
 
 // Get all reviews by current user  if userId === req.user.id
 router.get("/current", requireAuth, async (req, res, next) => {
@@ -76,10 +79,10 @@ router.get("/current", requireAuth, async (req, res, next) => {
           ? review.Spot.SpotImages[0].url
           : null;
 
-          const mappedReviewImages = review.ReviewImages.map(image => ({
-            id: image.id,
-            url: image.url
-          }));
+      const mappedReviewImages = review.ReviewImages.map((image) => ({
+        id: image.id,
+        url: image.url,
+      }));
       // Add the previewImage property to the spot object
       const spot = {
         id: review.Spot.id,
@@ -134,7 +137,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
 
     // Error is review does not belong to user
     if (review.userId !== req.user.id) {
-      return forbidden(res)
+      return forbidden(res);
     }
 
     if (review.ReviewImages.length >= 10) {
@@ -171,8 +174,10 @@ router.put(
     body("review").notEmpty().withMessage("Review text is required"),
     body("stars")
       .notEmpty()
-      .isInt({ min: 1, max: 5 }).withMessage("Stars must be an integer from 1 to 5"),
+      .isInt({ min: 1, max: 5 })
+      .withMessage("Stars must be an integer from 1 to 5"),
   ],
+  handleValidationErrors,
   async (req, res) => {
     const { reviewId } = req.params;
     const { review, stars } = req.body;
@@ -186,27 +191,8 @@ router.put(
       }
 
       if (userReview.userId !== req.user.id) {
-        return forbidden(res)
+        return forbidden(res);
       }
-
-          // Validate input parameters
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const formattedErrors = errors.array().map((err) => err.msg);
-
-      const fieldNames = ["review", "stars"];
-      const errorsObject = {};
-
-      for (let i = 0; i < fieldNames.length; i++) {
-        errorsObject[fieldNames[i]] = formattedErrors[i];
-      }
-
-      return res.status(400).json({
-        message: "Bad Request",
-        errors: errorsObject,
-      });
-    }
-
 
       // Update the userReview
       await userReview.update({
@@ -221,8 +207,8 @@ router.put(
         review: userReview.review,
         stars: userReview.stars,
         createdAt: formatDate(userReview.createdAt),
-        updatedAt: formatDate(userReview.updatedAt)
-      }
+        updatedAt: formatDate(userReview.updatedAt),
+      };
 
       return res.status(200).json(filteredUserReview);
     } catch (error) {
@@ -240,15 +226,16 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     const deletedReview = await Review.findByPk(req.params.reviewId);
 
     if (deletedReview.userId !== req.user.id) {
-      return forbidden(res)
+      return forbidden(res);
     }
 
     await deletedReview.destroy();
-    return deleted(res)
+    return deleted(res);
   } catch (error) {
     console.error(error);
     return res.status(404).json({
-      message: "Review couldn't be found" });
+      message: "Review couldn't be found",
+    });
   }
 });
 module.exports = router;
