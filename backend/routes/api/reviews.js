@@ -102,7 +102,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
       const formattedReview = {
         id: review.id,
         userId: review.userId,
-        reviewId: review.spotId,
+        spotId: review.spotId,
         review: review.review,
         stars: review.stars,
         createdAt: formatDate(review.createdAt),
