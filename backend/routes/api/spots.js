@@ -607,7 +607,7 @@ router.post(
         userId: newReview.userId,
         spotId: newReview.spotId,
         review: newReview.review,
-        stars: newReview.starts,
+        stars: newReview.stars,
         createdAt: formatDate(newReview.createdAt),
         updatedAt: formatDate(newReview.updatedAt),
       };
