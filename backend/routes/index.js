@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const apiRouter = require('./api');
+require('dotenv').config()
 
 router.use('/api', apiRouter);
 
