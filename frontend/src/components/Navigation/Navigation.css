@@ -25,3 +25,7 @@ ul {
 ul li {
     margin-left: 20px; /* Add some spacing between list items */
 }
+
+.menu-icon {
+    cursor: pointer;
+}

@@ -1,29 +1,39 @@
 /* eslint-disable react/prop-types */
 
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ProfileButton from './ProfileButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; 
 import { faAirbnb } from '@fortawesome/free-brands-svg-icons';
+import { faBars } from '@fortawesome/free-solid-svg-icons'; 
 import './Navigation.css';
 
 function Navigation({ isLoaded }) {
+  const [menuOpen, setMenuOpen] = useState(false); // State to manage menu visibility
   const sessionUser = useSelector(state => state.session.user);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen); // Toggle menu visibility
+  };
 
   return (
     <nav>
       <div>
-      <NavLink to="/">
-      <FontAwesomeIcon icon={faAirbnb} className='nav-icon'/>
-      </NavLink>
+        <NavLink to="/">
+          <FontAwesomeIcon icon={faAirbnb} className='nav-icon' />
+        </NavLink>
       </div>
-    <ul>
-      {isLoaded && (
+      <ul>
         <li>
-          <ProfileButton user={sessionUser} />
+          <FontAwesomeIcon icon={faBars} onClick={toggleMenu} className='menu-icon' />
         </li>
-      )}
-    </ul>
+        {isLoaded && menuOpen && (
+          <li>
+            <ProfileButton user={sessionUser} />
+          </li>
+        )}
+      </ul>
     </nav>
   );
 }
