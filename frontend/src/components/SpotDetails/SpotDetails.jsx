@@ -41,10 +41,12 @@ console.log('Reviews', reviews)
       <p>{spot.description}</p>
 
       <h4>Reviews</h4>
-      {reviews.length > 0 ? (
-        reviews.map(review => (
+      {reviews && Object.keys(reviews).length > 0 ? (
+        Object.values(reviews).map(review => (
           <div key={review.id} className="review">
-            <p><strong>{review.user}</strong>: {review.comment}</p>
+            <p><strong>{review.User.firstName} {review.User.lastName}</strong>: {review.review}</p>
+            <p>Rating: {review.stars} stars</p>
+            <p>{review.createdAt}</p>
           </div>
         ))
       ) : (

@@ -1,5 +1,5 @@
 import "./SpotCard.css";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function SpotCard({ spot }) {
   return (
