@@ -1,12 +1,13 @@
-import  { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchSpots } from '../../store/spots';
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSpots } from "../../store/spots";
+import SpotCard from "../SpotCard/SpotCard";
 
 const HomePage = () => {
   const dispatch = useDispatch();
-  const spots = useSelector(state => state.spots);
-  
-console.log(spots)
+  const spots = useSelector((state) => state.spots);
+
+  console.log(spots);
 
   useEffect(() => {
     dispatch(fetchSpots());
@@ -19,11 +20,11 @@ console.log(spots)
   return (
     <div>
       <h1>Home Page</h1>
-      <ul>
+      <div className="spot-card">
         {Object.values(spots).map((spot) => (
-          <li key={spot.id}>{spot.name}</li>
+          <SpotCard key={spot.id} spot={spot} />
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
