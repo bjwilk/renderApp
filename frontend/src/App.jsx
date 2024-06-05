@@ -5,6 +5,8 @@ import Navigation from './components/Navigation/Navigation';
 import * as sessionActions from './store/session';
 import HomePage from './components/HomePage/HomePage';
 import SpotDetails from './components/SpotDetails/SpotDetails';
+import { Modal } from "./context/Modal";
+
 
 function Layout() {
   const dispatch = useDispatch();
@@ -20,6 +22,7 @@ function Layout() {
     <>
       <Navigation isLoaded={isLoaded} />
       {isLoaded && <Outlet />}
+      <Modal />
     </>
   );
 }
