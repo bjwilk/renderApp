@@ -44,7 +44,7 @@ const spotsData = [
     price: 120,
   },
   {
-    ownerId: 4,
+    ownerId: 1,
     address: '101 Maple Road',
     city: 'Sample Town',
     state: 'FL',
@@ -56,7 +56,7 @@ const spotsData = [
     price: 200,
   },
   {
-    ownerId: 5,
+    ownerId: 2,
     address: '202 Birch Lane',
     city: 'Small Village',
     state: 'CO',
@@ -68,7 +68,7 @@ const spotsData = [
     price: 180,
   },
   {
-    ownerId: 6,
+    ownerId: 3,
     address: '303 Cedar Boulevard',
     city: 'Big City',
     state: 'IL',
@@ -80,7 +80,7 @@ const spotsData = [
     price: 220,
   },
   {
-    ownerId: 7,
+    ownerId: 1,
     address: '404 Elm Street',
     city: 'Historic Town',
     state: 'MA',
@@ -92,7 +92,7 @@ const spotsData = [
     price: 250,
   },
   {
-    ownerId: 8,
+    ownerId: 2,
     address: '505 Fir Avenue',
     city: 'Seaside Village',
     state: 'WA',
@@ -104,7 +104,7 @@ const spotsData = [
     price: 210,
   },
   {
-    ownerId: 9,
+    ownerId: 3,
     address: '606 Spruce Road',
     city: 'Mountain Town',
     state: 'CO',
@@ -116,7 +116,7 @@ const spotsData = [
     price: 190,
   },
   {
-    ownerId: 10,
+    ownerId: 1,
     address: '707 Walnut Drive',
     city: 'Countryside',
     state: 'VT',
@@ -128,7 +128,7 @@ const spotsData = [
     price: 160,
   },
   {
-    ownerId: 11,
+    ownerId: 2,
     address: '808 Palm Street',
     city: 'Sunny City',
     state: 'CA',
@@ -140,7 +140,7 @@ const spotsData = [
     price: 230,
   },
   {
-    ownerId: 12,
+    ownerId: 3,
     address: '909 Redwood Lane',
     city: 'Forest Town',
     state: 'OR',
@@ -152,7 +152,7 @@ const spotsData = [
     price: 175,
   },
   {
-    ownerId: 13,
+    ownerId: 3,
     address: '1010 Cypress Avenue',
     city: 'River City',
     state: 'LA',
@@ -164,7 +164,7 @@ const spotsData = [
     price: 140,
   },
   {
-    ownerId: 14,
+    ownerId: 1,
     address: '1111 Juniper Street',
     city: 'Urban Town',
     state: 'PA',
@@ -176,7 +176,7 @@ const spotsData = [
     price: 195,
   },
   {
-    ownerId: 15,
+    ownerId: 2,
     address: '1212 Chestnut Road',
     city: 'Green Village',
     state: 'KY',
@@ -188,7 +188,7 @@ const spotsData = [
     price: 170,
   },
   {
-    ownerId: 16,
+    ownerId: 2,
     address: '1313 Willow Avenue',
     city: 'Lake Town',
     state: 'MN',
@@ -200,7 +200,7 @@ const spotsData = [
     price: 220,
   },
   {
-    ownerId: 17,
+    ownerId: 1,
     address: '1414 Magnolia Street',
     city: 'Southern City',
     state: 'GA',
@@ -212,7 +212,7 @@ const spotsData = [
     price: 200,
   },
   {
-    ownerId: 18,
+    ownerId: 2,
     address: '1515 Poplar Lane',
     city: 'Desert Town',
     state: 'AZ',
@@ -224,7 +224,7 @@ const spotsData = [
     price: 180,
   },
   {
-    ownerId: 19,
+    ownerId: 1,
     address: '1616 Sycamore Road',
     city: 'College Town',
     state: 'NC',
@@ -236,7 +236,7 @@ const spotsData = [
     price: 150,
   },
   {
-    ownerId: 20,
+    ownerId: 3,
     address: '1717 Ash Street',
     city: 'Old Town',
     state: 'VA',
