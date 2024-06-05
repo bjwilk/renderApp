@@ -7,6 +7,7 @@ import LoginFormModal from '../LoginFromModal/LoginFormModal';
 import SignupFormModal from '../SignupFormModal/SignupFormModal';
 
 function ProfileButton({ user }) {
+  console.log(user)
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
   const ulRef = useRef();

@@ -6,6 +6,7 @@ import * as sessionActions from './store/session';
 import HomePage from './components/HomePage/HomePage';
 import SpotDetails from './components/SpotDetails/SpotDetails';
 import { Modal } from "./context/Modal";
+import CreateSpot from './components/CreateSpot/CreateSpot';
 
 
 function Layout() {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: '/spots/:spotId',
         element: <SpotDetails />
+      },
+      {
+        path: '/spots/new',
+        element: <CreateSpot />
       }
     ]
   }
