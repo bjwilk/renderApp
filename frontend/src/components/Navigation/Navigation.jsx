@@ -10,11 +10,11 @@ import { faBars } from '@fortawesome/free-solid-svg-icons';
 import './Navigation.css';
 
 function Navigation({ isLoaded }) {
-  const [menuOpen, setMenuOpen] = useState(false); // State to manage menu visibility
+  const [menuOpen, setMenuOpen] = useState(false); 
   const sessionUser = useSelector(state => state.session.user);
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen); // Toggle menu visibility
+    setMenuOpen(!menuOpen); 
   };
 
   return (
@@ -25,7 +25,7 @@ function Navigation({ isLoaded }) {
         </NavLink>
       </div>
       {sessionUser && (
-        <div><NavLink to={"/spots/new"}>Create a Spot</NavLink></div>
+        <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
       )}
       <ul>
         <li>

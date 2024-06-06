@@ -10,7 +10,6 @@ function SpotDetails() {
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
   const reviews = useSelector(state => state.reviews);
-console.log('Reviews', reviews)
 
   useEffect(() => {
     dispatch(fetchReviews(spotId));
