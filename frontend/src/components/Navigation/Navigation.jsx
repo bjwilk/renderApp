@@ -24,7 +24,9 @@ function Navigation({ isLoaded }) {
           <FontAwesomeIcon icon={faAirbnb} className='nav-icon' />
         </NavLink>
       </div>
-      <div><NavLink to={"/spots/new"}>Create a Spot</NavLink></div>
+      {sessionUser && (
+        <div><NavLink to={"/spots/new"}>Create a Spot</NavLink></div>
+      )}
       <ul>
         <li>
           <FontAwesomeIcon icon={faBars} onClick={toggleMenu} className='menu-icon' />
