@@ -3,7 +3,7 @@ import { csrfFetch } from "./csrf";
 const LOAD_SPOTS = 'spots/loadSpots';
 const CREATE_SPOT = 'spots/createSpot'; 
 const USERS_SPOT = 'spots/userSpot'
-const LOAD_SPOT = 'spots/loadSpot'
+const UPDATE_SPOT = 'spots/updateSpot'
 
 const loadSpots = (payload) => ({
     type: LOAD_SPOTS,
@@ -21,13 +21,19 @@ const userSpot = (payload) => ({
 })
 
 const loadSpot = (payload) => ({
-    type: LOAD_SPOT,
+    type: UPDATE_SPOT,
     payload
 })
 
-export const updateSpot = (spotId) => async (dispatch) => {
+export const updateSpot = (spot) => async (dispatch) => {
     try{
-        const res = await csrfFetch(`/api/spots/${spotId}`)
+        const res = await csrfFetch(`/api/spots/${spot.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(spot)
+        })
         if(res.ok){
             const data = await res.json()
             dispatch(loadSpot(data))
@@ -114,7 +120,7 @@ const spotReducer = (state = initialState, action) => {
             })
             return { ...state, ...newState}
         }
-        case LOAD_SPOT: {
+        case UPDATE_SPOT: {
             return { ...state, [action.payload.id]: action.payload }
         }
         default:

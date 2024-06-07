@@ -740,9 +740,11 @@ router.put(
     body("state").notEmpty().withMessage("State is required"),
     body("country").notEmpty().withMessage("Country is required"),
     body("lat")
+    .optional()
       .isFloat({ min: -90, max: 90 })
       .withMessage("Latitude must be within -90 and 90"),
     body("lng")
+    .optional()
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")

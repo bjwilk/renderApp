@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createNewSpot, updateSpot } from '../../store/spots'; 
 
-function CreateSpot({ user, spot }) {
+function CreateSpot({ spot }) {
+  const user = useSelector((state) => state.session.user);
     const dispatch = useDispatch();
-console.log("User", user)
     const [address, setAddress] = useState(spot ? spot.address : "");
     const [city, setCity] = useState(spot ? spot.city : "");
     const [state, setState] = useState(spot ? spot.state : "");
@@ -36,11 +36,9 @@ console.log("User", user)
         };
 
         if (spot) {
-            // If spot exists, update the spot
             payload.id = spot.id;
             await dispatch(updateSpot(payload));
         } else {
-            // Otherwise, create a new spot
             await dispatch(createNewSpot(payload));
         }
     };
