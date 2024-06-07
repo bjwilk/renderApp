@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { updateSpot } from "../../store/spots";
+import { fetchUpdateSpot } from "../../store/spots";
 
 import CreateSpot from "../CreateSpot/CreateSpot";
 
@@ -12,7 +12,7 @@ function UpdateSpot() {
   const spot = useSelector((state) => state.spots[spotId]);
 
   useEffect(() => {
-    dispatch(updateSpot(spotId));
+    dispatch(fetchUpdateSpot(spotId));
   }, [dispatch, spotId]);
 
 

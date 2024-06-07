@@ -26,7 +26,7 @@ const userSpot = (payload) => ({
     payload
 })
 
-const loadSpot = (payload) => ({
+const updateSpot = (payload) => ({
     type: UPDATE_SPOT,
     payload
 })
@@ -45,7 +45,7 @@ export const removeSpot = (spotId) => async (dispatch) => {
     }
 };
 
-export const updateSpot = (spot) => async (dispatch) => {
+export const fetchUpdateSpot = (spot) => async (dispatch) => {
     try{
         const res = await csrfFetch(`/api/spots/${spot.id}`, {
         method: 'PUT',
@@ -56,7 +56,7 @@ export const updateSpot = (spot) => async (dispatch) => {
         })
         if(res.ok){
             const data = await res.json()
-            dispatch(loadSpot(data))
+            dispatch(updateSpot(data))
         }else {
             console.error("Failed to load spot")
         }
