@@ -83,8 +83,6 @@ export const createNewSpot = (spot) => async (dispatch) => {
             body: JSON.stringify(spot)
         })
 
-        console.log('Result', res)
-
         if (res.ok) {
             const newSpot = await res.json();
             dispatch(createSpot(newSpot));
@@ -110,7 +108,6 @@ const spotReducer = (state = initialState, action) => {
             const newState = {};
             const newSpot = action.payload;
             newState[newSpot.id] = newSpot;
-            console.log('newState', newState)
             return { ...state, ...newState};
         }
         case USERS_SPOT: {
