@@ -23,6 +23,7 @@ function UserSpots() {
   return (
     <div>
       <h1>Manage Spots</h1>
+      <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
       <div className="spot-card">
         {Object.values(spots).map((spot) => (
           <div key={spot.id}>
