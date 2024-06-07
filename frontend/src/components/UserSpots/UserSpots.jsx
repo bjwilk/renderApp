@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import { fetchUserSpots } from "../../store/spots";
+import { fetchUserSpots, removeSpot } from "../../store/spots";
 import SpotCard from "../SpotCard/SpotCard";
 
 function UserSpots() {
@@ -11,6 +11,10 @@ function UserSpots() {
   useEffect(() => {
     dispatch(fetchUserSpots());
   }, [dispatch]);
+
+  const handleDelete = (spotId) => {
+    dispatch(removeSpot(spotId));
+  };
 
   if (!spots || Object.keys(spots).length === 0) {
     return <div>Loading...</div>;
@@ -26,7 +30,7 @@ function UserSpots() {
             <NavLink to={`/spots/${spot.id}/edit`}>
               <button>Update</button>
             </NavLink>
-            <button>Delete</button>
+            <button onClick={() => handleDelete(spot.id)}>Delete</button>
           </div>
         ))}
       </div>
