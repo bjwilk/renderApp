@@ -58,7 +58,7 @@ function CreateSpot({ spot }) {
   return (
     <>
       <div>{spot ? "Update Spot" : "Create Spot"}</div>
-      <section className="new-form-holder centered middled">
+      <section className="new-form-holder">
         <form onSubmit={handleSubmit}>
           <input value={address} onChange={updateAddress} placeholder="address" />
           <input value={city} onChange={updateCity} placeholder="city" />

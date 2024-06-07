@@ -1,8 +1,10 @@
 const express = require('express');
+const { restoreUser } = require("../utils/auth");
 const router = express.Router();
 const apiRouter = require('./api');
 require('dotenv').config()
 
+router.use(restoreUser);
 router.use('/api', apiRouter);
 
 // Static routes
