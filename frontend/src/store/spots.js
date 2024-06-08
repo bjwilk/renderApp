@@ -71,7 +71,6 @@ export const fetchSpots = () => async (dispatch) => {
         
         if (res.ok) {
             const data = await res.json();
-            console.log('data', data)
             dispatch(loadSpots(data));
         } else {
             console.error("Failed to fetch spots");
@@ -135,7 +134,7 @@ const spotReducer = (state = initialState, action) => {
             action.payload.Spots.forEach(spot => {
                 newState[spot.id] = spot
             })
-            return { ...state, ...newState}
+            return {  ...newState}
         }
         case UPDATE_SPOT: {
             return { ...state, [action.payload.id]: action.payload }

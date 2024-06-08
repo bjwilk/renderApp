@@ -502,30 +502,46 @@ router.get(
         maxPrice = Number.MAX_SAFE_INTEGER,
       } = req.query;
 
-    //  dynamic conditions for latitude and longitude
-    const latCondition = minLat || maxLat
-    ? { lat: { [Op.between]: [minLat || -90, maxLat || 90] } }
-    : { lat: { [Op.or]: [{ [Op.between]: [-90, 90] }, { [Op.is]: null }] } };
+  
+  //   const latCondition = minLat || maxLat
+  //   ? { lat: { [Op.between]: [minLat || -90, maxLat || 90] } }
+  //   : { lat: { [Op.or]: [{ [Op.between]: [-90, 90] }, { [Op.is]: null }] } };
 
-  const lngCondition = minLng || maxLng
-    ? { lng: { [Op.between]: [minLng || -180, maxLng || 180] } }
-    : { lng: { [Op.or]: [{ [Op.between]: [-180, 180] }, { [Op.is]: null }] } };
+  // const lngCondition = minLng || maxLng
+  //   ? { lng: { [Op.between]: [minLng || -180, maxLng || 180] } }
+  //   : { lng: { [Op.or]: [{ [Op.between]: [-180, 180] }, { [Op.is]: null }] } };
 
-  // Filter spots based on query parameters directly in the database query
+  // // Filter spots based on query parameters directly in the database query
+  // const usersSpots = await Spot.findAll({
+  //   where: {
+  //     ...latCondition,
+  //     ...lngCondition,
+  //     price: { [Op.between]: [minPrice, maxPrice] },
+  //   },
+  //   include: [{ model: SpotImage }],
+  // });
+
   const usersSpots = await Spot.findAll({
     where: {
-      ...latCondition,
-      ...lngCondition,
+      [Op.or]: [
+        { lat: { [Op.between]: [minLat, maxLat] } },
+        { lng: { [Op.between]: [minLng, maxLng] } },
+        { lat:  null, lng: null   },
+      ],
+      [Op.or]: [
+        { lng: { [Op.between]: [minLng, maxLng] } },
+        { lng: null  }
+      ],
       price: { [Op.between]: [minPrice, maxPrice] },
     },
     include: [{ model: SpotImage }],
   });
-
   // Slice the spots based on the requested page and size
-  const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
+  // const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
+
 
   const filteredResponse = await Promise.all(
-    paginatedSpots.map(async (spot) => {
+    usersSpots.map(async (spot) => {
       // Fetch all reviews for the spot
       const reviews = await Review.findAll({ where: { spotId: spot.id } });
 
@@ -543,8 +559,8 @@ router.get(
         city: spot.city,
         state: spot.state,
         country: spot.country,
-        lat: spot.lat,
-        lng: spot.lng,
+        lat: spot.lat || null,
+        lng: spot.lng || null,
         name: spot.name,
         description: spot.description,
         price: spot.price,
@@ -555,6 +571,7 @@ router.get(
       };
     })
   );
+
 
       return res.json({
         Spots: filteredResponse,
