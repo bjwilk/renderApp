@@ -137,7 +137,7 @@ router.get("/:spotId/reviews", async (req, res, next) => {
         url: image.url,
       })),
     }));
-
+console.log(formattedReviews)
     return res.json({
       Reviews: formattedReviews,
     });

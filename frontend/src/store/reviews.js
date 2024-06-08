@@ -58,11 +58,11 @@ const reviewReducer = (state = initialState, action) => {
       action.payload.Reviews.forEach((review) => {
         newState[review.id] = review;
       });
-      return { ...state, ...newState };
+      return { ...newState };
     }
     case CREATE_REVIEW: {
       const newReview = action.payload;
-      return { ...state, [newReview.id]: newReview };
+      return { [newReview.id]: newReview };
     }
     default:
       return state;
