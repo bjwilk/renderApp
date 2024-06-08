@@ -5,6 +5,12 @@ const CREATE_SPOT = 'spots/createSpot';
 const USERS_SPOT = 'spots/userSpot'
 const UPDATE_SPOT = 'spots/updateSpot'
 const REMOVE_SPOT = 'spots/removeSpot';
+const SPOT_DETAIL = 'spots/spotDetails'
+
+const showDetails = (spot) => ({
+    type: SPOT_DETAIL,
+    payload: spot
+})
 
 const removeSpotAction = (spotId) => ({
     type: REMOVE_SPOT,
@@ -65,6 +71,18 @@ export const fetchUpdateSpot = (spot) => async (dispatch) => {
     }
 }
 
+export const fetchSpotDetails = (spotId) => async (dispatch) => {
+try{
+const res = await csrfFetch(`/api/spots/${spotId}`)
+if(res.ok){
+    const data = await res.json();
+    dispatch(showDetails(data))
+}
+}catch (err){
+    console.error("Error fetching Details", err)
+}
+}
+
 export const fetchSpots = () => async (dispatch) => {
     try {
         const res = await csrfFetch("/api/spots");
@@ -122,6 +140,11 @@ const spotReducer = (state = initialState, action) => {
                 newState[spot.id] = spot;
             });
             return { ...state, ...newState };
+        }
+        case SPOT_DETAIL: {
+            const newState = { ...state};
+           newState[action.payload.id] = action.payload
+            return newState
         }
         case CREATE_SPOT: { 
             const newState = { ...state };

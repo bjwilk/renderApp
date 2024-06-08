@@ -137,7 +137,7 @@ router.get("/:spotId/reviews", async (req, res, next) => {
         url: image.url,
       })),
     }));
-console.log(formattedReviews)
+
     return res.json({
       Reviews: formattedReviews,
     });
@@ -165,7 +165,14 @@ router.get("/:spotId", async (req, res, next) => {
         {
           model: Review,
           as: "Reviews",
-          attributes: ["stars"],
+          attributes: ["id", "review", "stars", "createdAt"],
+          include: [
+            {
+              model: User,
+              as: "User",
+              attributes: ["id", "firstName", "lastName"],
+            },
+          ],
         },
       ],
     });
@@ -502,76 +509,70 @@ router.get(
         maxPrice = Number.MAX_SAFE_INTEGER,
       } = req.query;
 
-  
-  //   const latCondition = minLat || maxLat
-  //   ? { lat: { [Op.between]: [minLat || -90, maxLat || 90] } }
-  //   : { lat: { [Op.or]: [{ [Op.between]: [-90, 90] }, { [Op.is]: null }] } };
+      //   const latCondition = minLat || maxLat
+      //   ? { lat: { [Op.between]: [minLat || -90, maxLat || 90] } }
+      //   : { lat: { [Op.or]: [{ [Op.between]: [-90, 90] }, { [Op.is]: null }] } };
 
-  // const lngCondition = minLng || maxLng
-  //   ? { lng: { [Op.between]: [minLng || -180, maxLng || 180] } }
-  //   : { lng: { [Op.or]: [{ [Op.between]: [-180, 180] }, { [Op.is]: null }] } };
+      // const lngCondition = minLng || maxLng
+      //   ? { lng: { [Op.between]: [minLng || -180, maxLng || 180] } }
+      //   : { lng: { [Op.or]: [{ [Op.between]: [-180, 180] }, { [Op.is]: null }] } };
 
-  // // Filter spots based on query parameters directly in the database query
-  // const usersSpots = await Spot.findAll({
-  //   where: {
-  //     ...latCondition,
-  //     ...lngCondition,
-  //     price: { [Op.between]: [minPrice, maxPrice] },
-  //   },
-  //   include: [{ model: SpotImage }],
-  // });
+      // // Filter spots based on query parameters directly in the database query
+      // const usersSpots = await Spot.findAll({
+      //   where: {
+      //     ...latCondition,
+      //     ...lngCondition,
+      //     price: { [Op.between]: [minPrice, maxPrice] },
+      //   },
+      //   include: [{ model: SpotImage }],
+      // });
 
-  const usersSpots = await Spot.findAll({
-    where: {
-      [Op.or]: [
-        { lat: { [Op.between]: [minLat, maxLat] } },
-        { lng: { [Op.between]: [minLng, maxLng] } },
-        { lat:  null, lng: null   },
-      ],
-      [Op.or]: [
-        { lng: { [Op.between]: [minLng, maxLng] } },
-        { lng: null  }
-      ],
-      price: { [Op.between]: [minPrice, maxPrice] },
-    },
-    include: [{ model: SpotImage }],
-  });
-  // Slice the spots based on the requested page and size
-  // const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
+      const usersSpots = await Spot.findAll({
+        where: {
+          [Op.or]: [
+            { lat: { [Op.between]: [minLat, maxLat] } },
+            { lng: { [Op.between]: [minLng, maxLng] } },
+            { lat: null, lng: null },
+          ],
+          [Op.or]: [{ lng: { [Op.between]: [minLng, maxLng] } }, { lng: null }],
+          price: { [Op.between]: [minPrice, maxPrice] },
+        },
+        include: [{ model: SpotImage }],
+      });
+      // Slice the spots based on the requested page and size
+      // const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
 
+      const filteredResponse = await Promise.all(
+        usersSpots.map(async (spot) => {
+          // Fetch all reviews for the spot
+          const reviews = await Review.findAll({ where: { spotId: spot.id } });
 
-  const filteredResponse = await Promise.all(
-    usersSpots.map(async (spot) => {
-      // Fetch all reviews for the spot
-      const reviews = await Review.findAll({ where: { spotId: spot.id } });
+          // Calculate average rating for the spot
+          const averageRating =
+            reviews.length > 0
+              ? reviews.reduce((sum, review) => sum + review.stars, 0) /
+                reviews.length
+              : null;
 
-      // Calculate average rating for the spot
-      const averageRating =
-        reviews.length > 0
-          ? reviews.reduce((sum, review) => sum + review.stars, 0) /
-            reviews.length
-          : null;
-
-      return {
-        id: spot.id,
-        ownerId: spot.ownerId,
-        address: spot.address,
-        city: spot.city,
-        state: spot.state,
-        country: spot.country,
-        lat: spot.lat || null,
-        lng: spot.lng || null,
-        name: spot.name,
-        description: spot.description,
-        price: spot.price,
-        createdAt: formatDate(spot.createdAt),
-        updatedAt: formatDate(spot.updatedAt),
-        avgRating: averageRating,
-        previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
-      };
-    })
-  );
-
+          return {
+            id: spot.id,
+            ownerId: spot.ownerId,
+            address: spot.address,
+            city: spot.city,
+            state: spot.state,
+            country: spot.country,
+            lat: spot.lat || null,
+            lng: spot.lng || null,
+            name: spot.name,
+            description: spot.description,
+            price: spot.price,
+            createdAt: formatDate(spot.createdAt),
+            updatedAt: formatDate(spot.updatedAt),
+            avgRating: averageRating,
+            previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
+          };
+        })
+      );
 
       return res.json({
         Spots: filteredResponse,
@@ -589,6 +590,7 @@ router.get(
 router.post(
   "/:spotId/reviews",
   requireAuth,
+  handleValidationErrors,
   [
     body("review").notEmpty().withMessage("Review text is required"),
     body("stars")
@@ -596,7 +598,6 @@ router.post(
       .isInt({ min: 1, max: 5 })
       .withMessage("Stars must be an integer from 1 to 5"),
   ],
-  handleValidationErrors,
   async (req, res, next) => {
     const { review, stars } = req.body;
 
@@ -628,14 +629,22 @@ router.post(
         stars,
       });
 
+      const createdReview = await Review.findByPk(newReview.id, {
+        include: {
+          model: User,
+          as: "User",
+          attributes: ["id", "firstName", "lastName"]
+        }
+      });
+
       const filteredReview = {
-        id: newReview.id,
-        userId: newReview.userId,
-        spotId: newReview.spotId,
-        review: newReview.review,
-        stars: newReview.stars,
-        createdAt: formatDate(newReview.createdAt),
-        updatedAt: formatDate(newReview.updatedAt),
+        id: createdReview.id,
+        userId: createdReview.userId,
+        spotId: createdReview.spotId,
+        review: createdReview.review,
+        stars: createdReview.stars,
+        createdAt: formatDate(createdReview.createdAt),
+        updatedAt: formatDate(createdReview.updatedAt),
       };
 
       return res.status(201).json(filteredReview);
@@ -656,11 +665,11 @@ router.post(
     body("state").notEmpty().withMessage("State is required"),
     body("country").notEmpty().withMessage("Country is required"),
     body("lat")
-    .optional()
+      .optional()
       .isFloat({ min: -90, max: 90 })
       .withMessage("Latitude must be within -90 and 90"),
     body("lng")
-    .optional()
+      .optional()
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")
@@ -766,11 +775,11 @@ router.put(
     body("state").notEmpty().withMessage("State is required"),
     body("country").notEmpty().withMessage("Country is required"),
     body("lat")
-    .optional()
+      .optional()
       .isFloat({ min: -90, max: 90 })
       .withMessage("Latitude must be within -90 and 90"),
     body("lng")
-    .optional()
+      .optional()
       .isFloat({ min: -180, max: 180 })
       .withMessage("Longitude must be within -180 and 180"),
     body("name")

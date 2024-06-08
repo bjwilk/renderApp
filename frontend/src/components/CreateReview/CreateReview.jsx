@@ -14,6 +14,8 @@ function CreateReview() {
   const [stars, setStars] = useState(0);
   const [errors, setErrors] = useState({});
 
+  console.log(user)
+
 const handleSubmit = (e) => {
     e.preventDefault();
 
