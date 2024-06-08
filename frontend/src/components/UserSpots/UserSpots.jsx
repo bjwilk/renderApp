@@ -24,8 +24,7 @@ function UserSpots() {
 
   return (
     <div>
-      <h1>Manage Spots for {user.firstName} {user.lastName}</h1>
-      <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
+      <h1>Manage Spots</h1>
       <div className="spot-card">
         {Object.values(spots).map((spot) => (
           <div key={spot.id}>

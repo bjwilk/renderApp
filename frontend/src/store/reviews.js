@@ -23,10 +23,9 @@ export const addNewReview = (spotId, review) => async (dispatch) => {
       },
       body: JSON.stringify(review),
     });
-    console.log(res)
     if (res.ok) {
       const data = await res.json();
-      dispatch(createReview(spotId, data));
+      dispatch(createReview(data));
       return data;
     }
   } catch (err) {
@@ -59,14 +58,11 @@ const reviewReducer = (state = initialState, action) => {
       action.payload.Reviews.forEach((review) => {
         newState[review.id] = review;
       });
-      return { ...newState };
+      return { ...state, ...newState };
     }
     case CREATE_REVIEW: {
-      const newState = { ...state }
       const newReview = action.payload;
-      console.log('New Review', newReview)
-      newState[newReview.id] = newReview
-      return newState;
+      return { ...state, [newReview.id]: newReview };
     }
     default:
       return state;
