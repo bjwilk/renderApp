@@ -7,6 +7,8 @@ import SpotCard from "../SpotCard/SpotCard";
 function UserSpots() {
   const dispatch = useDispatch();
   const spots = useSelector((state) => state.spots);
+  const user = useSelector(state => state.session.user)
+  
 
   useEffect(() => {
     dispatch(fetchUserSpots());
@@ -22,7 +24,7 @@ function UserSpots() {
 
   return (
     <div>
-      <h1>Manage Spots</h1>
+      <h1>Manage Spots for {user.firstName} {user.lastName}</h1>
       <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
       <div className="spot-card">
         {Object.values(spots).map((spot) => (

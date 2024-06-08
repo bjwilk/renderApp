@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createNewSpot, updateSpot } from '../../store/spots'; 
+import { createNewSpot, fetchUpdateSpot } from '../../store/spots'; 
 import { useNavigate } from "react-router-dom";
 
 function CreateSpot({ spot }) {
@@ -41,7 +41,7 @@ function CreateSpot({ spot }) {
     let newSpot;
     if (spot) {
       payload.id = spot.id;
-      newSpot = await dispatch(updateSpot(payload));
+      newSpot = await dispatch(fetchUpdateSpot(payload));
     } else {
       newSpot = await dispatch(createNewSpot(payload));
     }

@@ -71,6 +71,7 @@ export const fetchSpots = () => async (dispatch) => {
         
         if (res.ok) {
             const data = await res.json();
+            console.log('data', data)
             dispatch(loadSpots(data));
         } else {
             console.error("Failed to fetch spots");
@@ -124,10 +125,10 @@ const spotReducer = (state = initialState, action) => {
             return { ...state, ...newState };
         }
         case CREATE_SPOT: { 
-            const newState = {};
+            const newState = { ...state };
             const newSpot = action.payload;
             newState[newSpot.id] = newSpot;
-            return { ...state, ...newState};
+            return newState;
         }
         case USERS_SPOT: {
             const newState = {};

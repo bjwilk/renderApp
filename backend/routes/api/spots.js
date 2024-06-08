@@ -502,50 +502,59 @@ router.get(
         maxPrice = Number.MAX_SAFE_INTEGER,
       } = req.query;
 
-      // Filter spots based on query parameters directly in the database query
-      const usersSpots = await Spot.findAll({
-        where: {
-          lat: { [Op.between]: [minLat, maxLat] },
-          lng: { [Op.between]: [minLng, maxLng] },
-          price: { [Op.between]: [minPrice, maxPrice] },
-        },
-        include: [{ model: SpotImage }],
-      });
+    //  dynamic conditions for latitude and longitude
+    const latCondition = minLat || maxLat
+    ? { lat: { [Op.between]: [minLat || -90, maxLat || 90] } }
+    : { lat: { [Op.or]: [{ [Op.between]: [-90, 90] }, { [Op.is]: null }] } };
 
-      // Slice the spots based on the requested page and size
-      const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
+  const lngCondition = minLng || maxLng
+    ? { lng: { [Op.between]: [minLng || -180, maxLng || 180] } }
+    : { lng: { [Op.or]: [{ [Op.between]: [-180, 180] }, { [Op.is]: null }] } };
 
-      const filteredResponse = await Promise.all(
-        paginatedSpots.map(async (spot) => {
-          // Fetch all reviews for the spot
-          const reviews = await Review.findAll({ where: { spotId: spot.id } });
+  // Filter spots based on query parameters directly in the database query
+  const usersSpots = await Spot.findAll({
+    where: {
+      ...latCondition,
+      ...lngCondition,
+      price: { [Op.between]: [minPrice, maxPrice] },
+    },
+    include: [{ model: SpotImage }],
+  });
 
-          // Calculate average rating for the spot
-          const averageRating =
-            reviews.length > 0
-              ? reviews.reduce((sum, review) => sum + review.stars, 0) /
-                reviews.length
-              : null;
+  // Slice the spots based on the requested page and size
+  const paginatedSpots = usersSpots.slice((page - 1) * size, page * size);
 
-          return {
-            id: spot.id,
-            ownerId: spot.ownerId,
-            address: spot.address,
-            city: spot.city,
-            state: spot.state,
-            country: spot.country,
-            lat: spot.lat,
-            lng: spot.lng,
-            name: spot.name,
-            description: spot.description,
-            price: spot.price,
-            createdAt: formatDate(spot.createdAt),
-            updatedAt: formatDate(spot.updatedAt),
-            avgRating: averageRating,
-            previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
-          };
-        })
-      );
+  const filteredResponse = await Promise.all(
+    paginatedSpots.map(async (spot) => {
+      // Fetch all reviews for the spot
+      const reviews = await Review.findAll({ where: { spotId: spot.id } });
+
+      // Calculate average rating for the spot
+      const averageRating =
+        reviews.length > 0
+          ? reviews.reduce((sum, review) => sum + review.stars, 0) /
+            reviews.length
+          : null;
+
+      return {
+        id: spot.id,
+        ownerId: spot.ownerId,
+        address: spot.address,
+        city: spot.city,
+        state: spot.state,
+        country: spot.country,
+        lat: spot.lat,
+        lng: spot.lng,
+        name: spot.name,
+        description: spot.description,
+        price: spot.price,
+        createdAt: formatDate(spot.createdAt),
+        updatedAt: formatDate(spot.updatedAt),
+        avgRating: averageRating,
+        previewImage: spot.SpotImages.map((image) => image.url)[0] || null,
+      };
+    })
+  );
 
       return res.json({
         Spots: filteredResponse,
