@@ -9,7 +9,7 @@ import { Modal } from "./context/Modal";
 import CreateSpot from './components/CreateSpot/CreateSpot';
 import UserSpots from './components/UserSpots/UserSpots';
 import UpdateSpot from './components/UpdateSpot/UpdateSpot';
-import UsersReviews from './components/UsersReviews/UsersReviews';
+import UsersReviews from './components/UserReviews/UserReviews';
 
 
 function Layout() {
