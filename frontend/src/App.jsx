@@ -9,6 +9,7 @@ import { Modal } from "./context/Modal";
 import CreateSpot from './components/CreateSpot/CreateSpot';
 import UserSpots from './components/UserSpots/UserSpots';
 import UpdateSpot from './components/UpdateSpot/UpdateSpot';
+import UsersReviews from './components/UserReviews/UserReviews';
 
 
 function Layout() {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: '/spots/:spotId/edit',
         element: <UpdateSpot />
+      },
+      {
+        path: '/reviews/current',
+        element: <UsersReviews />
       }
     ]
   }
