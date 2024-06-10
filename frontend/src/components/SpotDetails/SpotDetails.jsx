@@ -1,30 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchReviews } from '../../store/reviews';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchSpotDetails } from '../../store/spots';
+import { fetchReviews } from '../../store/reviews';
+import OpenModalButton from '../OpenModalButton/OpenModalButton';
+import CreateReview from '../CreateReview/CreateReview';
 
 function SpotDetails() {
   const { spotId } = useParams();
-  const [spot, setSpot] = useState(null);
+  const dispatch = useDispatch();
+  const spot = useSelector(state => state.spots[spotId]);
+  const user = useSelector(state => state.session.user);
+  const reviews = useSelector(state => state.reviews);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const dispatch = useDispatch();
-  const reviews = useSelector(state => state.reviews);
 
   useEffect(() => {
-    dispatch(fetchReviews(spotId));
-  }, [dispatch, spotId]);
-
-  useEffect(() => {
-    fetch(`/api/spots/${spotId}`)
-      .then(response => response.json())
-      .then(data => {
-        setSpot(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching spot data:', error);
-        setError(error);
+    dispatch(fetchSpotDetails(spotId))
+      .then(() => setLoading(false))
+      .catch((err) => {
+        console.error('Error fetching spot details:', err);
+        setError(err);
         setLoading(false);
       });
       dispatch(fetchReviews(spotId))
@@ -32,6 +28,8 @@ function SpotDetails() {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error loading spot details</p>;
+
+  const spotOwner = user && user.id === spot.ownerId;
 
   return (
     <div className="spot-details">
@@ -41,6 +39,14 @@ function SpotDetails() {
       <p>{spot.description}</p>
 
       <h4>Reviews</h4>
+      {!spotOwner && user && (
+        <div>
+          <OpenModalButton 
+            buttonText={"Post Your Review"}
+            modalComponent={<CreateReview spotId={spotId} />}
+          />
+        </div>
+      )}
       {reviews && Object.keys(reviews).length > 0 ? (
         Object.values(reviews).map(review => (
           <div key={review.id} className="review">
@@ -54,7 +60,7 @@ function SpotDetails() {
           </div>
         ))
       ) : (
-        <p>No reviews yet.</p>
+        <p>No reviews yet. Be the first to leave a review!</p>
       )}
     </div>
   );
