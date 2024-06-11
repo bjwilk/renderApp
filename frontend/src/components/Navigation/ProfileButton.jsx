@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { FaUserCircle } from 'react-icons/fa';
-import * as sessionActions from '../../store/session';
-import OpenModalButton from '../OpenModalButton/OpenModalButton';
-import LoginFormModal from '../LoginFromModal/LoginFormModal';
-import SignupFormModal from '../SignupFormModal/SignupFormModal';
+import { useState, useEffect, useRef } from "react";
+import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { FaUserCircle } from "react-icons/fa";
+import * as sessionActions from "../../store/session";
+import OpenModalButton from "../OpenModalButton/OpenModalButton";
+import LoginFormModal from "../LoginFromModal/LoginFormModal";
+import SignupFormModal from "../SignupFormModal/SignupFormModal";
 
 function ProfileButton({ user }) {
   const dispatch = useDispatch();
@@ -25,7 +25,7 @@ function ProfileButton({ user }) {
       }
     };
 
-    document.addEventListener('click', closeMenu);
+    document.addEventListener("click", closeMenu);
 
     return () => document.removeEventListener("click", closeMenu);
   }, [showMenu]);
@@ -49,11 +49,17 @@ function ProfileButton({ user }) {
         {user ? (
           <>
             <li>{user.username}</li>
-            <li>{user.firstName} {user.lastName}</li>
+            <li>
+              {user.firstName} {user.lastName}
+            </li>
             <li>{user.email}</li>
             <li>
-              <NavLink to={'/spots/current'}>Manage Spots</NavLink>
-              <NavLink to={'/reviews/current'}>Manage Reviews</NavLink>
+              <NavLink to={"/spots/current"}>Manage Spots</NavLink>
+            </li>
+            <li>
+              <NavLink to={"/reviews/current"}>Manage Reviews</NavLink>
+            </li>
+            <li>
               <button onClick={logout}>Log Out</button>
             </li>
           </>
