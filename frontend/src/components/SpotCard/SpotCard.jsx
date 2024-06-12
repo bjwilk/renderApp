@@ -7,9 +7,9 @@ function SpotCard({ spot }) {
     <div>
       <NavLink to={`/spots/${spot.id}`}>
         <h3>{spot.name}</h3>
-        <div className="card-preview-image">
+        <div>
           {previewImage ? (
-            <img src={previewImage} alt={spot.name} />
+            <img className="card-preview-image" src={previewImage} alt={spot.name} />
           ) : (
             "No image"
           )}

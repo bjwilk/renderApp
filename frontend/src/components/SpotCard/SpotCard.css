@@ -2,3 +2,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
 }
+
+.card-preview-image {
+    width: auto;
+    height: 100px;
+}

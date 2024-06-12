@@ -11,7 +11,6 @@ function CreateSpot({ spot }) {
   const navigate = useNavigate();
   const user = useSelector((state) => state.session.user);
   const dispatch = useDispatch();
-
   const [address, setAddress] = useState(spot ? spot.address : "");
   const [city, setCity] = useState(spot ? spot.city : "");
   const [state, setState] = useState(spot ? spot.state : "");
@@ -21,7 +20,7 @@ function CreateSpot({ spot }) {
   const [description, setDescription] = useState(spot ? spot.description : "");
   const [urls, setUrls] = useState(["", "", "", "", ""]);
   const [errors, setErrors] = useState({});
-
+console.log(spot)
   const updateAddress = (e) => setAddress(e.target.value);
   const updateCity = (e) => setCity(e.target.value);
   const updateState = (e) => setState(e.target.value);

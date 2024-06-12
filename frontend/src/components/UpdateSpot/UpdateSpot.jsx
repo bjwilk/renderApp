@@ -11,6 +11,7 @@ function UpdateSpot() {
   const user = useSelector((state) => state.session.user);
   const spot = useSelector((state) => state.spots[spotId]);
 
+
   useEffect(() => {
     dispatch(fetchUpdateSpot(spotId));
   }, [dispatch, spotId]);
