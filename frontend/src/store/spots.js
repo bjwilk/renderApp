@@ -6,6 +6,13 @@ const USERS_SPOT = 'spots/userSpot'
 const UPDATE_SPOT = 'spots/updateSpot'
 const REMOVE_SPOT = 'spots/removeSpot';
 const SPOT_DETAIL = 'spots/spotDetails'
+const SPOT_IMAGE = 'spots/spotImage';
+
+const createImage = (spotId, payload) => ({
+    type: SPOT_IMAGE,
+    spotId,
+    payload,
+});
 
 const showDetails = (spot) => ({
     type: SPOT_DETAIL,
@@ -130,6 +137,30 @@ export const createNewSpot = (spot) => async (dispatch) => {
     }
 }
 
+export const addNewImages = (spotId, imagePayloads) => async (dispatch) => {
+    try {
+      const res = await csrfFetch(`/api/spots/${spotId}/images`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ images: imagePayloads }),
+      });
+  
+      if (res.ok) {
+        const data = await res.json();
+        // Dispatch an action if needed, e.g., to update the state with the new images
+        return data;
+      }
+    } catch (err) {
+      console.error("Error adding images", err);
+    }
+  };
+  
+
+  
+  
+
 const initialState = {};
 
 const spotReducer = (state = initialState, action) => {
@@ -165,6 +196,15 @@ const spotReducer = (state = initialState, action) => {
         case REMOVE_SPOT: {
             const newState = { ...state };
             delete newState[action.spotId];
+            return newState;
+        }
+        case SPOT_IMAGE: {
+            const newState = { ...state };
+            const spot = newState[action.spotId];
+            if (spot) {
+                spot.images = spot.images || [];
+                spot.images.push(action.payload);
+            }
             return newState;
         }
         default:

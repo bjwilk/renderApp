@@ -735,7 +735,7 @@ router.post(
 // POST create a new image for a spot by id
 router.post("/:spotId/images", requireAuth, async (req, res) => {
   const { spotId } = req.params;
-  const { url, preview } = req.body;
+  const { images } = req.body;
 
   try {
     // Check if the spot with the specified ID exists
@@ -743,27 +743,31 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
 
     // Check if user owns spot
     if (spot.ownerId !== req.user.id) {
-      return forbidden(res);
+      return res.status(403).json({ message: "Forbidden" });
     }
 
-    // Create a new image for the spot
-    const newImage = await SpotImage.create({
-      url,
-      preview,
-      spotId: req.params.spotId,
-    });
+    const createdImages = [];
+    for (let image of images) {
+      const newImage = await SpotImage.create({
+        url: image.url,
+        preview: image.preview,
+        spotId,
+      });
+      createdImages.push({
+        id: newImage.id,
+        spotId: newImage.spotId,
+        url: newImage.url,
+        preview: newImage.preview,
+      });
+    }
 
-    formattedResponse = {
-      id: newImage.id,
-      url: newImage.url,
-      preview: newImage.preview,
-    };
-    return res.status(200).json(formattedResponse);
+    return res.status(200).json({ images: createdImages });
   } catch (error) {
     console.log(error);
-    return noSpot(res);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
 
 // PUT edit existing spot by id
 router.put(
