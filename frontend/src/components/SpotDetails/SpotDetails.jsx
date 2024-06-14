@@ -21,7 +21,14 @@ function SpotDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log(spot);
+  const spotReviews = [];
+
+  const reviewList = Object.values(reviews);
+  Object.values(reviewList).map((item) => {
+    if (item.spotId == spotId) {
+      spotReviews.push(item);
+    }
+  });
 
   useEffect(() => {
     dispatch(fetchSpotDetails(spotId))
@@ -44,6 +51,11 @@ function SpotDetails() {
   const previewImage = spotImages.map((index) => {
     return index.url;
   });
+
+  // let hasReview;
+  // if(user && userReview[0].User.id === user.id){
+  //   hasReview = true;
+  // }
 
   const otherImages = [];
 
@@ -111,18 +123,30 @@ function SpotDetails() {
           ${spot.price} night
           <br></br>
           <div>{starIcons}</div>
-          {spot.avgStarRating} 
+          {spot.avgStarRating}
           <br></br>
-          {spot.numReviews ? "Reviews" : <><FontAwesomeIcon icon={regularStar} /> New</>}
+          {spot.numReviews ? (
+            "Reviews"
+          ) : (
+            <>
+              <FontAwesomeIcon icon={regularStar} /> New
+            </>
+          )}
           <button>Reserve</button>
         </div>
       </div>
 
       <div>
         <h4>
-        {spot.numReviews ? "Reviews" : <><FontAwesomeIcon icon={regularStar} /> New</>}
+          {spot.numReviews ? (
+            "Reviews"
+          ) : (
+            <>
+              <FontAwesomeIcon icon={regularStar} /> New
+            </>
+          )}
           <br></br>
-        {spot.avgStarRating} 
+          {spot.avgStarRating}
           <div>{starIcons}</div>
         </h4>
 
@@ -134,21 +158,12 @@ function SpotDetails() {
             />
           </div>
         )}
-        {reviews && Object.keys(reviews).length > 0 ? (
-          Object.values(reviews).map((review) => (
-            <div key={review.id} className="review">
-              {review.User ? (
-                <p>
-                  <strong>
-                    {review.User.firstName} 
-                  </strong>
-                  : {review.review}
-                </p>
-              ) : (
-                <p>Anonymous: {review.review}</p>
-              )}
-              <p>Rating: {review.stars} stars</p>
-              <p>{new Date(review.createdAt).toLocaleDateString()}</p>
+        {spotReviews && Object.keys(spotReviews).length > 0 ? (
+          Object.values(spotReviews).map((review) => (
+            <div key={review.id}>
+              <h3>{review.User?.firstName || "Anonymous"}</h3>
+              <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+              <p>{review.review}</p>
             </div>
           ))
         ) : (
