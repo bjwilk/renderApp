@@ -21,7 +21,7 @@ function SpotDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log(reviews);
+  console.log(spot);
 
   useEffect(() => {
     dispatch(fetchSpotDetails(spotId))
@@ -103,7 +103,7 @@ function SpotDetails() {
       <div className="details-section">
         <div className="spot-info">
           <h2>
-            Hosted by {user.firstName} {user.lastName}
+            Hosted by {spot.Owner.firstName} {spot.Owner.lastName}
           </h2>
           <p>{spot.description}</p>
         </div>

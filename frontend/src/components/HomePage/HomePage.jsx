@@ -7,7 +7,6 @@ import SpotCard from "../SpotCard/SpotCard";
 const HomePage = () => {
   const dispatch = useDispatch();
   const spots = useSelector((state) => state.spots);
-  console.log(spots)
 
   useEffect(() => {
     dispatch(fetchSpots());
