@@ -5,6 +5,9 @@ import { fetchSpotDetails } from "../../store/spots";
 import { fetchReviews } from "../../store/reviews";
 import OpenModalButton from "../OpenModalButton/OpenModalButton";
 import CreateReview from "../CreateReview/CreateReview";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
+import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
 import "./SpotDetails.css";
 
 function SpotDetails() {
@@ -15,6 +18,8 @@ function SpotDetails() {
   const reviews = useSelector((state) => state.reviews);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  console.log(reviews);
 
   useEffect(() => {
     dispatch(fetchSpotDetails(spotId))
@@ -46,73 +51,107 @@ function SpotDetails() {
     }
   });
 
+  const starIcons = [];
+  const fullStars = Math.floor(spot.avgStarRating);
+  const hasHalfStar = spot.avgStarRating % 1 !== 0;
+
+  // Push full stars
+  for (let i = 0; i < fullStars; i++) {
+    starIcons.push(<FontAwesomeIcon key={i} icon={solidStar} />);
+  }
+
+  // Push half star if needed
+  if (hasHalfStar) {
+    starIcons.push(
+      <FontAwesomeIcon key="half" icon={regularStar} className="half-star" />
+    );
+  }
+
   return (
-    <div className="spot-details">
-      <div className="spot-name">
-        <h3>{spot.name}</h3>
-        <h5>
-          {spot.city}, {spot.state}, {spot.country}
-        </h5>
-      </div>
-      <div className="images-container">
-        <div className="preview-image">
-          {previewImage ? (
-            <img src={previewImage.toString()} alt={spot.name} />
-          ) : (
-            "No image"
-          )}
+    <>
+      <div className="spot-details">
+        <div className="spot-name">
+          <h3>{spot.name}</h3>
+          <h5>
+            {spot.city}, {spot.state}, {spot.country}
+          </h5>
         </div>
-        <div className="image-box">
-          {otherImages.length > 0
-            ? otherImages.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`${spot.name} ${index + 1}`}
-                />
-              ))
-            : "No additional images"}
+        <div className="images-container">
+          <div className="preview-image">
+            {previewImage ? (
+              <img src={previewImage.toString()} alt={spot.name} />
+            ) : (
+              "No image"
+            )}
+          </div>
+          <div className="image-box">
+            {otherImages.length > 0
+              ? otherImages.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${spot.name} ${index + 1}`}
+                  />
+                ))
+              : "No additional images"}
+          </div>
         </div>
       </div>
+      <br></br>
       <div className="details-section">
         <div className="spot-info">
           <h2>
             Hosted by {user.firstName} {user.lastName}
           </h2>
           <p>{spot.description}</p>
-          <div className="spot-info-box">${spot.price}</div>
+        </div>
+        <div className="spot-info-box">
+          ${spot.price} night
+          <br></br>
+          <div>{starIcons}</div>
+          {spot.avgStarRating} avg
+          <br></br>
+          {spot.numReviews} reviews
+          <button>Reserve</button>
         </div>
       </div>
-      <h4>Reviews</h4>
-      {!spotOwner && user && (
-        <div>
-          <OpenModalButton
-            buttonText={"Post Your Review"}
-            modalComponent={<CreateReview spotId={spotId} />}
-          />
-        </div>
-      )}
-      {reviews && Object.keys(reviews).length > 0 ? (
-        Object.values(reviews).map((review) => (
-          <div key={review.id} className="review">
-            {review.User ? (
-              <p>
-                <strong>
-                  {review.User.firstName} {review.User.lastName}
-                </strong>
-                : {review.review}
-              </p>
-            ) : (
-              <p>Anonymous: {review.review}</p>
-            )}
-            <p>Rating: {review.stars} stars</p>
-            <p>{new Date(review.createdAt).toLocaleDateString()}</p>
+
+      <div>
+        <h4>
+          {spot.avgStarRating} avg - {spot.numReviews} Reviews
+          <div>{starIcons}</div>
+        </h4>
+
+        {!spotOwner && user && (
+          <div>
+            <OpenModalButton
+              buttonText={"Post Your Review"}
+              modalComponent={<CreateReview spotId={spotId} />}
+            />
           </div>
-        ))
-      ) : (
-        <p>No reviews yet. Be the first to leave a review!</p>
-      )}
-    </div>
+        )}
+        {reviews && Object.keys(reviews).length > 0 ? (
+          Object.values(reviews).map((review) => (
+            <div key={review.id} className="review">
+              {review.User ? (
+                <p>
+                  <strong>
+                    {review.User.firstName} 
+                  </strong>
+                  : {review.review}
+                </p>
+              ) : (
+                <p>Anonymous: {review.review}</p>
+              )}
+              <p>Rating: {review.stars} stars</p>
+              <p>{new Date(review.createdAt).toLocaleDateString()}</p>
+            </div>
+          ))
+        ) : (
+          <p>No reviews yet. Be the first to leave a review!</p>
+        )}
+      </div>
+    </>
   );
 }
 export default SpotDetails;
