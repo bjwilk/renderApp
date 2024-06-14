@@ -5,6 +5,7 @@ import { fetchSpotDetails } from "../../store/spots";
 import { fetchReviews } from "../../store/reviews";
 import OpenModalButton from "../OpenModalButton/OpenModalButton";
 import CreateReview from "../CreateReview/CreateReview";
+import "./SpotDetails.css";
 
 function SpotDetails() {
   const { spotId } = useParams();
@@ -47,15 +48,20 @@ function SpotDetails() {
 
   return (
     <div className="spot-details">
-      <h3>{spot.name}</h3>
-      <div className="preview-image">
-        {previewImage ? (
-          <img src={previewImage.toString()} alt={spot.name} />
-        ) : (
-          "No image"
-        )}
+      <div className="spot-name">
+        <h3>{spot.name}</h3>
+        <h5>
+          {spot.city}, {spot.state}, {spot.country}
+        </h5>
       </div>
       <div className="images-container">
+        <div className="preview-image">
+          {previewImage ? (
+            <img src={previewImage.toString()} alt={spot.name} />
+          ) : (
+            "No image"
+          )}
+        </div>
         <div className="image-box">
           {otherImages.length > 0
             ? otherImages.map((image, index) => (
@@ -68,9 +74,15 @@ function SpotDetails() {
             : "No additional images"}
         </div>
       </div>
-      <p>{spot.price}</p>
-      <p>{spot.description}</p>
-
+      <div className="details-section">
+        <div className="spot-info">
+          <h2>
+            Hosted by {user.firstName} {user.lastName}
+          </h2>
+          <p>{spot.description}</p>
+          <div className="spot-info-box">${spot.price}</div>
+        </div>
+      </div>
       <h4>Reviews</h4>
       {!spotOwner && user && (
         <div>
