@@ -9,17 +9,22 @@ if (process.env.NODE_ENV === 'production') {
 const spotImagesData = [
   {
     spotId: 1,
-    url: 'image_url_1.jpg',
+    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
     preview: true,
   },
   {
     spotId: 2,
-    url: 'image_url_2.jpg',
+    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
     preview: false,
   },
   {
     spotId: 3,
-    url: 'image_url_3.jpg',
+    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
+    preview: true,
+  },
+  {
+    spotId: 4,
+    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
     preview: true,
   },
 ];
