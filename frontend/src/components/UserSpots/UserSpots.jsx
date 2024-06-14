@@ -9,6 +9,7 @@ function UserSpots() {
   const spots = useSelector((state) => state.spots);
   const user = useSelector(state => state.session.user)
   
+  console.log(spots)
 
   useEffect(() => {
     dispatch(fetchUserSpots());
@@ -18,14 +19,16 @@ function UserSpots() {
     dispatch(removeSpot(spotId));
   };
 
-  if (!spots || Object.keys(spots).length === 0) {
+  if (!spots) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
       <h1>Manage Spots for {user.firstName} {user.lastName}</h1>
-      <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
+      {Object.keys(spots).length === 0 && (
+        <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
+      )}
       <div className="spot-card">
         {Object.values(spots).map((spot) => (
           <div key={spot.id}>

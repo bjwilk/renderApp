@@ -123,7 +123,7 @@ function SpotDetails() {
           ${spot.price} night
           <br></br>
           <div>{starIcons}</div>
-          {spot.avgStarRating}
+          {spot.avgStarRating.toFixed(2)}
           <br></br>
           {spot.numReviews ? (
             "Reviews"
@@ -146,7 +146,7 @@ function SpotDetails() {
             </>
           )}
           <br></br>
-          {spot.avgStarRating}
+          {spot.avgStarRating.toFixed(2)}
           <div>{starIcons}</div>
         </h4>
 
