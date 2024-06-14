@@ -8,6 +8,8 @@ import CreateReview from "../CreateReview/CreateReview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+
 import "./SpotDetails.css";
 
 function SpotDetails() {
@@ -109,16 +111,18 @@ function SpotDetails() {
           ${spot.price} night
           <br></br>
           <div>{starIcons}</div>
-          {spot.avgStarRating} avg
+          {spot.avgStarRating} 
           <br></br>
-          {spot.numReviews} reviews
+          {spot.numReviews ? "Reviews" : <><FontAwesomeIcon icon={regularStar} /> New</>}
           <button>Reserve</button>
         </div>
       </div>
 
       <div>
         <h4>
-          {spot.avgStarRating} avg - {spot.numReviews} Reviews
+        {spot.numReviews ? "Reviews" : <><FontAwesomeIcon icon={regularStar} /> New</>}
+          <br></br>
+        {spot.avgStarRating} 
           <div>{starIcons}</div>
         </h4>
 
