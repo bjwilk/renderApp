@@ -52,10 +52,10 @@ function SpotDetails() {
     return index.url;
   });
 
-  // let hasReview;
-  // if(user && userReview[0].User.id === user.id){
-  //   hasReview = true;
-  // }
+  let hasReview;
+  if (user && spotReviews.find((review) => review.User.id == user.id)) {
+    hasReview = true;
+  }
 
   const otherImages = [];
 
@@ -150,7 +150,7 @@ function SpotDetails() {
           <div>{starIcons}</div>
         </h4>
 
-        {!spotOwner && user && (
+        {!spotOwner && user && !hasReview && (
           <div>
             <OpenModalButton
               buttonText={"Post Your Review"}
@@ -159,13 +159,15 @@ function SpotDetails() {
           </div>
         )}
         {spotReviews && Object.keys(spotReviews).length > 0 ? (
-          Object.values(spotReviews).map((review) => (
-            <div key={review.id}>
-              <h3>{review.User?.firstName || "Anonymous"}</h3>
-              <span>{new Date(review.createdAt).toLocaleDateString()}</span>
-              <p>{review.review}</p>
-            </div>
-          ))
+          Object.values(spotReviews)
+            .reverse()
+            .map((review) => (
+              <div key={review.id}>
+                <h3>{review.User?.firstName || "Anonymous"}</h3>
+                <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+                <p>{review.review}</p>
+              </div>
+            ))
         ) : (
           <p>No reviews yet. Be the first to leave a review!</p>
         )}

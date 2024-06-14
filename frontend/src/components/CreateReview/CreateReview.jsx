@@ -27,7 +27,10 @@ const handleSubmit = (e) => {
             stars
         })
     )
-    .then(closeModal)
+    .then(() => {
+      closeModal();
+      window.location.reload(); // Refresh the page
+  })
     .catch(async (res) => {
         const data = await res.json();
         if(data?.errors){
