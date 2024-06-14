@@ -11,23 +11,28 @@ function LoginFormModal() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const { closeModal } = useModal();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const isButtonDisabled = credential.length < 4 || password.length < 6;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
-    return dispatch(sessionActions.login({ credential, password }))
-      .then(() => {
-        closeModal()
-        navigate("/")
-      })
-      .catch(async (res) => {
-        const data = await res.json();
-        if (data && data.errors) {
-          setErrors(data.errors);
-        }
-      });
+
+    try {
+      await dispatch(sessionActions.login({ credential, password }));
+      closeModal();
+      navigate("/");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.errors) {
+        setErrors(err.response.data.errors);
+      } else{
+        console.error("Failed to log in:", err);
+        setErrors({ password: "Failed to log in. Please try again." });
+      }
+    }
   };
+
 
   return (
     <>
@@ -51,10 +56,20 @@ function LoginFormModal() {
             required
           />
         </label>
-        {errors.credential && (
-          <p>{errors.credential}</p>
+        {errors.credential && errors.password && (
+          <>
+            <p className='errors'>Wrong Username or Email: {errors.credential}</p>
+            <p className='errors'>Wrong Password: {errors.password}</p>
+          </>
         )}
-        <button type="submit">Log In</button>
+        {errors.credential && !errors.password && (
+          <p className='errors'>Wrong Username or Email: {errors.credential}</p>
+        )}
+        {!errors.credential && errors.password && (
+          <p className='errors'>The provided credentials were invalid: {errors.password}</p>
+        )}
+     
+        <button disabled={isButtonDisabled} type="submit">Log In</button>
       </form>
     </>
   );
