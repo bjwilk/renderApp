@@ -20,7 +20,7 @@ function CreateSpot({ spot }) {
   const [description, setDescription] = useState(spot ? spot.description : "");
   const [urls, setUrls] = useState(["", "", "", "", ""]);
   const [errors, setErrors] = useState({});
-console.log(spot)
+
   const updateAddress = (e) => setAddress(e.target.value);
   const updateCity = (e) => setCity(e.target.value);
   const updateState = (e) => setState(e.target.value);
