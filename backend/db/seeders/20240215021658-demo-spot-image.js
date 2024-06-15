@@ -6,6 +6,7 @@ let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
 }
+
 const spotImagesData = [];
 
 for (let spotId = 1; spotId <= 20; spotId++) {
@@ -17,6 +18,7 @@ for (let spotId = 1; spotId <= 20; spotId++) {
     });
   }
 }
+
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
