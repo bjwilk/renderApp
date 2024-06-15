@@ -7,3 +7,18 @@
     width: auto;
     height: 100px;
 }
+
+.half-star {
+    position: relative;
+    width: 0.7em; 
+    overflow: hidden;
+  }
+  
+  .half-star::before {
+    font-weight: 900;
+    color: gold;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1em; 
+  }

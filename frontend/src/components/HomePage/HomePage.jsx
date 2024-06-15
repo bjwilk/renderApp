@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchSpots } from "../../store/spots";
 import SpotCard from "../SpotCard/SpotCard";
 
+
 const HomePage = () => {
   const dispatch = useDispatch();
   const spots = useSelector((state) => state.spots);
@@ -14,6 +15,7 @@ const HomePage = () => {
   if (!spots || Object.keys(spots).length === 0) {
     return <div>Loading...</div>;
   }
+
 
   return (
     <div>

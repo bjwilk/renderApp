@@ -1,0 +1,14 @@
+.star-rating {
+    display: flex;
+  }
+  
+  .star {
+    cursor: pointer;
+    color: gold;
+    transition: color 0.2s;
+  }
+  
+  .star:hover {
+    color: darkorange;
+  }
+  

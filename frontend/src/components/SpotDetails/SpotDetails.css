@@ -6,21 +6,20 @@
 
 .images-container {
     display: flex;
-    /* flex-wrap: wrap; */
     gap: 10px;
     justify-content: center;
 }
 
 .preview-image {
     width: 100%;
-    max-width: 600px; /* Adjust this value as needed */
+    max-width: 600px; 
     height: 600px;
     margin-bottom: 20px;
 }
 
 .preview-image img {
     width: 100%;
-    height: auto; /* Maintain aspect ratio */
+    height: auto; 
     object-fit: cover;
     border-radius: 10px; 
 }
@@ -33,10 +32,10 @@
 }
 
 .image-box img {
-    width: 350px; /* Adjust these values as needed */
+    width: 350px; 
     height: 300px;
-    object-fit: cover; /* Maintain aspect ratio and cover the container */
-    border-radius: 5px; /* Optional: Add some rounding to the corners */
+    object-fit: cover; 
+    border-radius: 5px; 
 }
 
 .spot-name {
@@ -48,15 +47,48 @@
     margin-bottom: 10px;
 }
 
+.details-section {
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+}
+
 .spot-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
     margin-bottom: 10px;
 }
 
 .spot-info-box {
-    display: flex
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 1px solid;
+    padding: 10px; 
 }
 
-.details-section {
-    display: flex;
-    flex-direction: row;
+
+
+button {
+    background-color: red;
+    width: 70px;
+    padding: 5px; 
+    margin-top: 10px; 
+    align-self: flex-start; 
 }
+
+.half-star {
+    position: relative;
+    width: 0.7em; 
+    overflow: hidden;
+  }
+  
+  .half-star::before {
+    font-weight: 900;
+    color: gold;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1em; 
+  }

@@ -6,28 +6,20 @@ let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
 }
-const spotImagesData = [
-  {
-    spotId: 1,
-    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
-    preview: true,
-  },
-  {
-    spotId: 2,
-    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
-    preview: false,
-  },
-  {
-    spotId: 3,
-    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
-    preview: true,
-  },
-  {
-    spotId: 4,
-    url: 'https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg',
-    preview: true,
-  },
-];
+
+const spotImagesData = [];
+
+for (let spotId = 1; spotId <= 20; spotId++) {
+  for (let imageIndex = 1; imageIndex <= 5; imageIndex++) {
+    spotImagesData.push({
+      spotId,
+      url: `https://t3.ftcdn.net/jpg/02/32/72/98/240_F_232729870_7OheyiLRXMPMgtuKh0lddl70v7alqTyo.jpg?spot=${spotId}&image=${imageIndex}`,
+      preview: imageIndex === 1, // First image is the preview
+    });
+  }
+}
+
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await SpotImage.bulkCreate(spotImagesData, { validate: true })

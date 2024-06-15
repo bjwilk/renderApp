@@ -3,6 +3,7 @@ import { useDispatch , useSelector } from "react-redux";
 import { useParams } from 'react-router-dom';
 import * as reviewActions from "../../store/reviews";
 import { useModal } from "../../context/Modal";
+import StarRating from "./StarRating";
 import "./CreateReview.css";
 
 function CreateReview() {
@@ -26,7 +27,10 @@ const handleSubmit = (e) => {
             stars
         })
     )
-    .then(closeModal)
+    .then(() => {
+      closeModal();
+      window.location.reload(); // Refresh the page
+  })
     .catch(async (res) => {
         const data = await res.json();
         if(data?.errors){
@@ -35,27 +39,25 @@ const handleSubmit = (e) => {
     })
 }
 
+const isButtonDisabled = review.length < 10 || !stars;
+
+
   return (
     <>
       <form onSubmit={handleSubmit}>
+        <h2>How was your stay?</h2>
         <label>
           Review
           <input
             type="text"
             value={review}
+            placeholder="Leave your review here"
             onChange={(e) => setReview(e.target.value)}
           />
         </label>
         {errors.review && <p>{errors.review}</p>}
-        <label>
-          Stars
-          <input
-            type="number"
-            value={stars}
-            onChange={(e) => setStars(e.target.value)}
-          />
-        </label>
-        <button type="submit">Create Review</button>
+       <StarRating stars={stars} setStars={setStars}/>
+        <button disabled={isButtonDisabled} type="submit">Submit Your Review</button>
       </form>
     </>
   );
