@@ -16,7 +16,7 @@ function CreateSpot({ spot }) {
   const [state, setState] = useState(spot ? spot.state : "");
   const [country, setCountry] = useState(spot ? spot.country : "");
   const [name, setName] = useState(spot ? spot.name : "");
-  const [price, setPrice] = useState(spot ? spot.price : 0);
+  const [price, setPrice] = useState(spot ? spot.price : null);
   const [description, setDescription] = useState(spot ? spot.description : "");
   const [urls, setUrls] = useState(["", "", "", "", ""]);
   const [errors, setErrors] = useState({});
@@ -56,7 +56,7 @@ function CreateSpot({ spot }) {
     if (!state) newErrors.state = "State is required";
     if (!country) newErrors.country = "Country is required";
     if (!name) newErrors.name = "Name is required";
-    if (!price || price <= 0) newErrors.price = "Price must be greater than zero";
+    if (!price) newErrors.price = "Price is required";
     if (description.length < 30) newErrors.description = "Description of 30 characters is required";
     if (!urls[0]) newErrors.urls = "Preview Image Required";
 
