@@ -34,6 +34,18 @@ function CreateSpot({ spot }) {
     setUrls(newUrls);
   };
 
+  const validateUrls = () => {
+    const urlErrors = {};
+    urls.forEach((url, index) => {
+      const splitUrl = url.split('.');
+      const ending = splitUrl[splitUrl.length - 1].toLowerCase();
+      if (url && !['png', 'jpg', 'jpeg'].includes(ending)) {
+        urlErrors[`url${index}`] = "Image URL must end in .png, .jpg, or .jpeg";
+      }
+    });
+    return urlErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -46,7 +58,16 @@ function CreateSpot({ spot }) {
     if (!name) newErrors.name = "Name is required";
     if (!price || price <= 0) newErrors.price = "Price must be greater than zero";
     if (description.length < 30) newErrors.description = "Description of 30 characters is required";
-    if (!urls[0]) newErrors.urls = "Preview Image Required"
+    if (!urls[0]) newErrors.urls = "Preview Image Required";
+
+    const urlValidationErrors = validateUrls();
+    if (Object.keys(urlValidationErrors).length > 0) {
+      setErrors({ ...newErrors, ...urlValidationErrors });
+      return;
+    }
+
+    console.log(urlValidationErrors)
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -132,14 +153,16 @@ function CreateSpot({ spot }) {
             <h3>Liven up your spot with photos</h3>
             <p>Submit a link to at least one photo to publish your spot</p>
             {urls.map((url, index) => (
-              <input
-                key={index}
-                value={url}
-                onChange={updateUrl(index)}
-                placeholder={
-                  index === 0 ? "Preview Image URL" : `Image URL ${index + 1}`
-                }
-              />
+              <div key={index}>
+                <input
+                  value={url}
+                  onChange={updateUrl(index)}
+                  placeholder={
+                    index === 0 ? "Preview Image URL" : `Image URL ${index + 1}`
+                  }
+                />
+                {errors[`url${index}`] && <p className="errors">{errors[`url${index}`]}</p>}
+              </div>
             ))}
             {errors.urls && <p className="errors">{errors.urls}</p>}
           </div>
