@@ -197,7 +197,7 @@ function SpotDetails() {
                 <h3>{review.User?.firstName || "Anonymous"}</h3>
                 <span>{new Date(review.createdAt).toLocaleDateString()}</span>
                 <p>{review.review}</p>
-                {review.userId == user.id && (
+                {user && review.userId == user.id && (
                   <>
                     <button onClick={() => handleDeleteModal(review.id)}>Delete</button>
                   </>
