@@ -26,13 +26,26 @@ function LoginFormModal() {
     } catch (err) {
       if (err.response && err.response.data && err.response.data.errors) {
         setErrors(err.response.data.errors);
-      } else{
+      } else {
         console.error("Failed to log in:", err);
         setErrors({ password: "Failed to log in. Please try again." });
       }
     }
   };
 
+  const handleDemoLogin = async (e) => {
+    e.preventDefault();
+    setErrors({});
+
+    try {
+      await dispatch(sessionActions.login({ credential: 'FakerUser1', password: 'password' }));
+      closeModal();
+      navigate("/");
+    } catch (err) {
+      console.error("Failed to log in as demo user:", err);
+      setErrors({ demo: "Failed to log in as demo user. Please try again." });
+    }
+  };
 
   return (
     <>
@@ -68,8 +81,10 @@ function LoginFormModal() {
         {!errors.credential && errors.password && (
           <p className='errors'>The provided credentials were invalid: {errors.password}</p>
         )}
-     
+     <br></br>
         <button disabled={isButtonDisabled} type="submit">Log In</button>
+        <br></br>
+        <button onClick={handleDemoLogin} className="demo-button">Demo User</button>
       </form>
     </>
   );
