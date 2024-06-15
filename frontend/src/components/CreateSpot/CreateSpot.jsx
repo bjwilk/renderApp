@@ -36,6 +36,21 @@ function CreateSpot({ spot }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+
+    const newErrors = {};
+    if (!address) newErrors.address = "Address is required";
+    if (!city) newErrors.city = "City is required";
+    if (!state) newErrors.state = "State is required";
+    if (!country) newErrors.country = "Country is required";
+    if (!name) newErrors.name = "Name is required";
+    if (!price || price <= 0) newErrors.price = "Price must be greater than zero";
+    if (description.length < 30) newErrors.description = "Description of 30 characters is required";
+    if (!urls[0]) newErrors.urls = "Preview Image Required"
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     const payload = {
       ownerId: user.id,
@@ -91,20 +106,27 @@ function CreateSpot({ spot }) {
             onChange={updateAddress}
             placeholder="Address"
           />
+          {errors.address && <p className="errors">{errors.address}</p>}
           <input value={city} onChange={updateCity} placeholder="City" />
+          {errors.city && <p className="errors">{errors.city}</p>}
           <input value={state} onChange={updateState} placeholder="State" />
+          {errors.state && <p className="errors">{errors.state}</p>}
           <input
             value={country}
             onChange={updateCountry}
             placeholder="Country"
           />
+          {errors.country && <p className="errors">{errors.country}</p>}
           <input value={name} onChange={updateName} placeholder="Name" />
+          {errors.name && <p className="errors">{errors.name}</p>}
           <input value={price} onChange={updatePrice} placeholder="Price" />
+          {errors.price && <p className="errors">{errors.price}</p>}
           <textarea
             value={description}
             onChange={updateDescription}
             placeholder="Description"
           />
+          {errors.description && <p className="errors">{errors.description}</p>}
           <br></br>
           <div className="image-section">
             <h3>Liven up your spot with photos</h3>
@@ -119,6 +141,7 @@ function CreateSpot({ spot }) {
                 }
               />
             ))}
+            {errors.urls && <p className="errors">{errors.urls}</p>}
           </div>
           <br></br>
           <button type="submit">
