@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useModal } from "../../context/Modal";
+import StarRating from "../CreateReview/StarRating";
 import { fetchUserReviews, fetchRemoveReview, fetchUpdateReview } from "../../store/reviews";
 
 function UsersReviews() {

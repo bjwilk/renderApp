@@ -1,25 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSpotDetails } from "../../store/spots";
-import { fetchReviews } from "../../store/reviews";
+import { fetchReviews, fetchRemoveReview } from "../../store/reviews";
 import OpenModalButton from "../OpenModalButton/OpenModalButton";
 import CreateReview from "../CreateReview/CreateReview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { useModal } from "../../context/Modal";
+import ConfirmDeleteModal from "../ConfirmDeleteModal/ConfirmDeleteModal";
 
 import "./SpotDetails.css";
 
 function SpotDetails() {
   const { spotId } = useParams();
   const dispatch = useDispatch();
+  const ulRef = useRef();
+  const { closeModal } = useModal();
+
   const spot = useSelector((state) => state.spots[spotId]);
   const user = useSelector((state) => state.session.user);
   const reviews = useSelector((state) => state.reviews);
+
+  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedReviewId, setSelectedReviewId] = useState(null);
 
   const spotReviews = [];
 
@@ -80,6 +88,29 @@ function SpotDetails() {
       <FontAwesomeIcon key="half" icon={regularStar} className="half-star" />
     );
   }
+
+  const handleDeleteModal = (reviewId) => {
+    setSelectedReviewId(reviewId);
+    setShowModal(true);
+  };
+
+
+  const handleConfirmDelete = () => {
+    dispatch(fetchRemoveReview(selectedReviewId))
+      .then(() => {
+        dispatch(fetchRemoveReview(selectedReviewId))
+        setShowModal(false);
+        setSelectedReviewId(null);
+      })
+      .catch((err) => {
+        console.error("Error deleting review:", err);
+      });
+  };
+
+  const handleCancelDelete = () => {
+    setShowModal(false);
+    setSelectedReviewId(null);
+  };
 
   return (
     <>
@@ -166,12 +197,26 @@ function SpotDetails() {
                 <h3>{review.User?.firstName || "Anonymous"}</h3>
                 <span>{new Date(review.createdAt).toLocaleDateString()}</span>
                 <p>{review.review}</p>
+                {review.userId == user.id && (
+                  <>
+                    <button onClick={() => handleDeleteModal(review.id)}>Delete</button>
+                  </>
+                )}
               </div>
             ))
         ) : (
           <p>No reviews yet. Be the first to leave a review!</p>
         )}
       </div>
+
+      {showModal && (
+        <div>
+          <ConfirmDeleteModal
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
+          />
+        </div>
+      )}
     </>
   );
 }
