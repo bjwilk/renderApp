@@ -131,8 +131,10 @@ function SpotDetails() {
           ${spot.price} night
           <br />
           <div>{starIcons}</div>
-          {spot.avgStarRating.toFixed(2)}
-          <br />
+
+          {spot.avgStarRating && spot.avgStarRating.toFixed(2)}
+          <br></br>
+
           {spot.numReviews ? (
             "Reviews"
           ) : (
@@ -145,7 +147,22 @@ function SpotDetails() {
       </div>
 
       <div>
+
+        <h4>
+          {spot.numReviews ? (
+            "Reviews"
+          ) : (
+            <>
+              <FontAwesomeIcon icon={regularStar} /> New
+            </>
+          )}
+          <br></br>
+          {spot.avgStarRating && spot.avgStarRating.toFixed(2)}
+          <div>{starIcons}</div>
+        </h4>
+
         <h4>Reviews</h4>
+
 
         {!spotOwner && user && !hasReview && (
           <div>
