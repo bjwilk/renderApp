@@ -15,6 +15,7 @@ function CreateReview() {
   const [stars, setStars] = useState(0);
   const [errors, setErrors] = useState({});
 
+ 
 
 const handleSubmit = (e) => {
     e.preventDefault();
@@ -29,7 +30,7 @@ const handleSubmit = (e) => {
     )
     .then(() => {
       closeModal();
-      window.location.reload(); // Refresh the page
+      // window.location.reload(); // Refresh the page
   })
     .catch(async (res) => {
         const data = await res.json();

@@ -32,6 +32,7 @@ function SpotDetails() {
     (review) => review.spotId == spotId
   );
 
+
   useEffect(() => {
     dispatch(fetchSpotDetails(spotId))
       .then(() => setLoading(false))
@@ -52,7 +53,11 @@ function SpotDetails() {
   const previewImage = spotImages.find((image) => image.preview)?.url;
   const otherImages = spotImages.filter((image) => !image.preview).map(image => image.url);
 
-  const hasReview = user && spotReviews.some((review) => review.User.id == user.id);
+
+  let hasReview;
+  if(user && Object.keys(reviews).length > 0 && (Object.values(reviews).find(item => item.userId == user.id)) ){
+    hasReview = true
+  }
 
   const starIcons = [];
   const fullStars = Math.floor(spot.avgStarRating);

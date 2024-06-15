@@ -21,9 +21,9 @@ const loadUserReviews = (payload) => ({
   payload,
 });
 
-const createReview = (spotId, payload) => ({
+const createReview = (payload) => (
+  {
   type: CREATE_REVIEW,
-  spotId,
   payload,
 });
 
@@ -78,6 +78,7 @@ export const fetchUserReviews = () => async (dispatch) => {
   }
 };
 
+
 export const addNewReview = (spotId, review) => async (dispatch) => {
   try {
     const res = await csrfFetch(`/api/spots/${spotId}/reviews`, {
@@ -89,6 +90,8 @@ export const addNewReview = (spotId, review) => async (dispatch) => {
     });
     if (res.ok) {
       const data = await res.json();
+      console.log(spotId)
+      console.log(data)
       dispatch(createReview(data));
       return data;
     }
@@ -126,6 +129,7 @@ const reviewReducer = (state = initialState, action) => {
     }
     case CREATE_REVIEW: {
       const newReview = action.payload;
+      console.log(newReview)
       return { ...state, [newReview.id]: newReview };
     }
     case USER_REVIEWS: {
