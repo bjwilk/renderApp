@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { fetchUpdateSpot } from "../../store/spots";
 import { useNavigate } from "react-router-dom";
 
-
 function UpdateSpot() {
   const { spotId } = useParams();
   const navigate = useNavigate();
@@ -28,7 +27,6 @@ function UpdateSpot() {
   const updatePrice = (e) => setPrice(e.target.value);
   const updateDescription = (e) => setDescription(e.target.value);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -49,6 +47,7 @@ function UpdateSpot() {
       payload.id = spot.id;
       newSpot = await dispatch(fetchUpdateSpot(payload));
     }
+    navigate(`/spots/${spotId}`);
   };
 
   if (!user) {

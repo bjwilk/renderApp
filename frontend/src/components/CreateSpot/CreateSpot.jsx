@@ -16,7 +16,7 @@ function CreateSpot({ spot }) {
   const [state, setState] = useState(spot ? spot.state : "");
   const [country, setCountry] = useState(spot ? spot.country : "");
   const [name, setName] = useState(spot ? spot.name : "");
-  const [price, setPrice] = useState(spot ? spot.price : 0);
+  const [price, setPrice] = useState(spot ? spot.price : null);
   const [description, setDescription] = useState(spot ? spot.description : "");
   const [urls, setUrls] = useState(["", "", "", "", ""]);
   const [errors, setErrors] = useState({});
@@ -37,9 +37,9 @@ function CreateSpot({ spot }) {
   const validateUrls = () => {
     const urlErrors = {};
     urls.forEach((url, index) => {
-      const splitUrl = url.split('.');
+      const splitUrl = url.split(".");
       const ending = splitUrl[splitUrl.length - 1].toLowerCase();
-      if (url && !['png', 'jpg', 'jpeg'].includes(ending)) {
+      if (url && !["png", "jpg", "jpeg"].includes(ending)) {
         urlErrors[`url${index}`] = "Image URL must end in .png, .jpg, or .jpeg";
       }
     });
@@ -56,8 +56,9 @@ function CreateSpot({ spot }) {
     if (!state) newErrors.state = "State is required";
     if (!country) newErrors.country = "Country is required";
     if (!name) newErrors.name = "Name is required";
-    if (!price || price <= 0) newErrors.price = "Price must be greater than zero";
-    if (description.length < 30) newErrors.description = "Description of 30 characters is required";
+    if (!price) newErrors.price = "Price is required";
+    if (description.length < 30)
+      newErrors.description = "Description of 30 characters is required";
     if (!urls[0]) newErrors.urls = "Preview Image Required";
 
     const urlValidationErrors = validateUrls();
@@ -66,7 +67,7 @@ function CreateSpot({ spot }) {
       return;
     }
 
-    console.log(urlValidationErrors)
+    console.log(urlValidationErrors);
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -119,9 +120,14 @@ function CreateSpot({ spot }) {
 
   return (
     <>
-      <div>{spot ? "Update Spot" : "Create Spot"}</div>
+      <h1>{spot ? "Update Spot" : "Create New Spot"}</h1>
       <section className="new-form-holder">
         <form onSubmit={handleSubmit}>
+          <h2>Where's your place located?</h2>
+          <p>
+            Guest will only get your exact address once they booked a
+            reservation.
+          </p>
           <input
             value={address}
             onChange={updateAddress}
@@ -138,16 +144,33 @@ function CreateSpot({ spot }) {
             placeholder="Country"
           />
           {errors.country && <p className="errors">{errors.country}</p>}
-          <input value={name} onChange={updateName} placeholder="Name" />
-          {errors.name && <p className="errors">{errors.name}</p>}
-          <input value={price} onChange={updatePrice} placeholder="Price" />
-          {errors.price && <p className="errors">{errors.price}</p>}
+          <h2>Describe your place to guests</h2>
+          <p>
+            Mention the best features of your space, any special amenities like
+            fst wifi or parking, and what you love about the neighborhood.
+          </p>
           <textarea
             value={description}
             onChange={updateDescription}
             placeholder="Description"
           />
           {errors.description && <p className="errors">{errors.description}</p>}
+          <h2>Create a title for your spot</h2>
+          <p>
+            Catch guests' attention with a spot title that highlights what makes
+            your place special
+          </p>
+          <input value={name} onChange={updateName} placeholder="Name" />
+          {errors.name && <p className="errors">{errors.name}</p>}
+          <br></br>
+          <h2>Set a base price for your spot</h2>
+          <p>
+            Competitive pricing can help your listing stand out and rank higher
+            in search results
+          </p>
+          <span>$</span>{" "}
+          <input value={price} onChange={updatePrice} placeholder="Price" />
+          {errors.price && <p className="errors">{errors.price}</p>}
           <br></br>
           <div className="image-section">
             <h3>Liven up your spot with photos</h3>
@@ -161,7 +184,9 @@ function CreateSpot({ spot }) {
                     index === 0 ? "Preview Image URL" : `Image URL ${index + 1}`
                   }
                 />
-                {errors[`url${index}`] && <p className="errors">{errors[`url${index}`]}</p>}
+                {errors[`url${index}`] && (
+                  <p className="errors">{errors[`url${index}`]}</p>
+                )}
               </div>
             ))}
             {errors.urls && <p className="errors">{errors.urls}</p>}

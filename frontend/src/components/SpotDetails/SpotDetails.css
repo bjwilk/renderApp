@@ -92,3 +92,15 @@ button {
     top: 0;
     width: 1em; 
   }
+
+  .solid {
+    border-top: 1px solid black; /* Adjust color and thickness as needed */
+    margin: 20px 0; /* Optional: Add margin for spacing */
+  }
+
+  .review-stars {
+    display: flex;
+    flex-direction: row;
+  }
+
+ 

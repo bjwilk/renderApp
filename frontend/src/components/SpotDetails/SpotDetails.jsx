@@ -32,7 +32,6 @@ function SpotDetails() {
     (review) => review.spotId == spotId
   );
 
-
   useEffect(() => {
     dispatch(fetchSpotDetails(spotId))
       .then(() => setLoading(false))
@@ -51,12 +50,17 @@ function SpotDetails() {
 
   const spotImages = Object.values(spot.SpotImages);
   const previewImage = spotImages.find((image) => image.preview)?.url;
-  const otherImages = spotImages.filter((image) => !image.preview).map(image => image.url);
-
+  const otherImages = spotImages
+    .filter((image) => !image.preview)
+    .map((image) => image.url);
 
   let hasReview;
-  if(user && Object.keys(reviews).length > 0 && (Object.values(reviews).find(item => item.userId == user.id)) ){
-    hasReview = true
+  if (
+    user &&
+    Object.keys(reviews).length > 0 &&
+    Object.values(reviews).find((item) => item.userId == user.id)
+  ) {
+    hasReview = true;
   }
 
   const starIcons = [];
@@ -135,39 +139,47 @@ function SpotDetails() {
         <div className="spot-info-box">
           ${spot.price} night
           <br />
-          <div>{starIcons}</div>
-
-          {spot.avgStarRating && spot.avgStarRating.toFixed(2)}
-          <br></br>
-
-          {spot.numReviews ? (
-            "Reviews"
-          ) : (
-            <>
-              <FontAwesomeIcon icon={regularStar} /> New
-            </>
-          )}
-          <button>Reserve</button>
+          <div className="review-stars">
+            {starIcons}
+            {!spot.numReviews && (
+              <>
+                <FontAwesomeIcon icon={regularStar} /> New
+              </>
+            )}
+            {spot.numReviews > 0 && (
+              <>
+                {spot.avgStarRating && <span> · </span>}
+                <span>
+                  {spot.numReviews} {spot.numReviews > 1 ? "reviews" : "review"}
+                </span>
+              </>
+            )}
+          </div>
+          <button onClick={() => window.alert("Feature coming soon.")}>
+            Reserve
+          </button>
         </div>
       </div>
 
       <div>
+        <hr className="solid" />
 
-        <h4>
-          {spot.numReviews ? (
-            "Reviews"
-          ) : (
+        <div className="review-stars">
+          {starIcons}
+          {!spot.numReviews && (
             <>
               <FontAwesomeIcon icon={regularStar} /> New
             </>
           )}
-          <br></br>
-          {spot.avgStarRating && spot.avgStarRating.toFixed(2)}
-          <div>{starIcons}</div>
-        </h4>
-
-        <h4>Reviews</h4>
-
+          {spot.numReviews > 0 && (
+            <>
+              {spot.avgStarRating && <span> · </span>}
+              <span>
+                {spot.numReviews} {spot.numReviews > 1 ? "reviews" : "review"}
+              </span>
+            </>
+          )}
+        </div>
 
         {!spotOwner && user && !hasReview && (
           <div>
@@ -185,7 +197,9 @@ function SpotDetails() {
               <p>{review.review}</p>
               {user && review.userId === user.id && (
                 <>
-                  <button onClick={() => handleDeleteModal(review.id)}>Delete</button>
+                  <button onClick={() => handleDeleteModal(review.id)}>
+                    Delete
+                  </button>
                 </>
               )}
             </div>

@@ -39,8 +39,8 @@ function SpotCard({ spot }) {
         <h5>{spot.city}, {spot.state}</h5>
         <p>${spot.price} night</p>
         <div className="rating">
-          {starIcons} {/* Render the star icons */}
-          <span>{spot.avgRating} avg</span>
+          {starIcons} 
+          <span>{spot.avgRating} {spot.avgRating ? "" : "New"}</span>
         </div>
       </NavLink>
     </div>
