@@ -67,8 +67,6 @@ function CreateSpot({ spot }) {
       return;
     }
 
-    console.log(urlValidationErrors);
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;

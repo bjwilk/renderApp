@@ -30,6 +30,21 @@ function UpdateSpot() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const newErrors = {};
+    if (!address) newErrors.address = "Address is required";
+    if (!city) newErrors.city = "City is required";
+    if (!state) newErrors.state = "State is required";
+    if (!country) newErrors.country = "Country is required";
+    if (!name) newErrors.name = "Name is required";
+    if (!price) newErrors.price = "Price is required";
+    if (description.length < 30)
+      newErrors.description = "Description of 30 characters is required";
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
     const payload = {
       ownerId: user.id,
       address,
@@ -56,32 +71,62 @@ function UpdateSpot() {
 
   return (
     <>
-      <div>Create Spot</div>
+      <h1>{spot ? "Update Spot" : "Create New Spot"}</h1>
       <section className="new-form-holder">
         <form onSubmit={handleSubmit}>
+          <h2>Where's your place located?</h2>
+          <p>
+            Guest will only get your exact address once they booked a
+            reservation.
+          </p>
           <input
             value={address}
             onChange={updateAddress}
             placeholder="Address"
           />
+          {errors.address && <p className="errors">{errors.address}</p>}
           <input value={city} onChange={updateCity} placeholder="City" />
+          {errors.city && <p className="errors">{errors.city}</p>}
           <input value={state} onChange={updateState} placeholder="State" />
+          {errors.state && <p className="errors">{errors.state}</p>}
           <input
             value={country}
             onChange={updateCountry}
             placeholder="Country"
           />
-          <input value={name} onChange={updateName} placeholder="Name" />
-          <input value={price} onChange={updatePrice} placeholder="Price" />
+          {errors.country && <p className="errors">{errors.country}</p>}
+          <h2>Describe your place to guests</h2>
+          <p>
+            Mention the best features of your space, any special amenities like
+            fst wifi or parking, and what you love about the neighborhood.
+          </p>
           <textarea
             value={description}
             onChange={updateDescription}
             placeholder="Description"
           />
+          {errors.description && <p className="errors">{errors.description}</p>}
+          <h2>Create a title for your spot</h2>
+          <p>
+            Catch guests' attention with a spot title that highlights what makes
+            your place special
+          </p>
+          <input value={name} onChange={updateName} placeholder="Name" />
+          {errors.name && <p className="errors">{errors.name}</p>}
           <br></br>
-
+          <h2>Set a base price for your spot</h2>
+          <p>
+            Competitive pricing can help your listing stand out and rank higher
+            in search results
+          </p>
+          <span>$</span>{" "}
+          <input value={price} onChange={updatePrice} placeholder="Price" />
+          {errors.price && <p className="errors">{errors.price}</p>}
           <br></br>
-          <button type="submit">Update Spot</button>
+          <br></br>
+          <button type="submit">
+            {spot ? "Update Spot" : "Create new Spot"}
+          </button>
           <button type="button" onClick={() => navigate(-1)}>
             Cancel
           </button>
