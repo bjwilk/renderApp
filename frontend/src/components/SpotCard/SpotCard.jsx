@@ -40,7 +40,7 @@ function SpotCard({ spot }) {
         <p>${spot.price} night</p>
         <div className="rating">
           {starIcons} 
-          <span>{spot.avgRating} {spot.avgRating ? "" : "New"}</span>
+          <span>{spot.avgRating && <span>{spot.avgRating.toFixed(1)}</span>} {spot.avgRating ? "" : "New"}</span>
         </div>
       </NavLink>
     </div>

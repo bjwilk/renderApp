@@ -23,6 +23,7 @@ function SpotDetails() {
   const user = useSelector((state) => state.session.user);
   const reviews = useSelector((state) => state.reviews);
 
+
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -85,6 +86,7 @@ function SpotDetails() {
   const handleConfirmDelete = () => {
     dispatch(fetchRemoveReview(selectedReviewId))
       .then(() => {
+        dispatch(fetchSpotDetails(spotId))
         setShowModal(false);
         setSelectedReviewId(null);
       })
@@ -148,7 +150,7 @@ function SpotDetails() {
             )}
             {spot.numReviews > 0 && (
               <>
-                {spot.avgStarRating && <span> · </span>}
+               {spot.avgStarRating && <span>{spot.avgStarRating.toFixed(1)}</span>} {spot.avgStarRating && <span>&nbsp; · &nbsp;</span>}
                 <span>
                   {spot.numReviews} {spot.numReviews > 1 ? "reviews" : "review"}
                 </span>
@@ -173,7 +175,7 @@ function SpotDetails() {
           )}
           {spot.numReviews > 0 && (
             <>
-              {spot.avgStarRating && <span> · </span>}
+              {spot.avgStarRating && <span>{spot.avgStarRating.toFixed(1)}</span>} {spot.avgStarRating && <span>&nbsp; · &nbsp;</span>}
               <span>
                 {spot.numReviews} {spot.numReviews > 1 ? "reviews" : "review"}
               </span>

@@ -90,8 +90,6 @@ export const addNewReview = (spotId, review) => async (dispatch) => {
     });
     if (res.ok) {
       const data = await res.json();
-      console.log(spotId)
-      console.log(data)
       dispatch(createReview(data));
       return data;
     }

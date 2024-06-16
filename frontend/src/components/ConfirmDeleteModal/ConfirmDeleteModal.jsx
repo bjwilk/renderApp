@@ -8,7 +8,7 @@ const ConfirmDeleteModal = ({ onConfirm, onCancel }) => {
         <h2>Are you sure you want to delete this review?</h2>
         <div className="modal-buttons">
           <button onClick={onConfirm}>Yes (Delete Review)</button>
-          <button onClick={onCancel}>No (Keep Review)</button>
+          <button className='keep' onClick={onCancel}>No (Keep Review)</button>
         </div>
       </div>
     </div>

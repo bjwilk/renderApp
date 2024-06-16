@@ -8,7 +8,7 @@ const ConfirmDeleteSpotModal = ({ onConfirm, onCancel }) => {
         <h2>Are you sure you want to delete this spot?</h2>
         <div className="modal-buttons">
           <button onClick={onConfirm}>Yes (Delete Spot)</button>
-          <button onClick={onCancel}>No (Keep Spot)</button>
+          <button className='keep' onClick={onCancel}>No (Keep Spot)</button>
         </div>
       </div>
     </div>
