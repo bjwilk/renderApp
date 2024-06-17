@@ -6,6 +6,7 @@ import { useModal } from "../../context/Modal";
 import ConfirmDeleteSpotModal from "../ConfirmDeleteModal/ConfirmDeleteSpotModal";
 
 import SpotCard from "../SpotCard/SpotCard";
+import './UserSpots.css'
 
 function UserSpots() {
   const dispatch = useDispatch();
@@ -69,7 +70,7 @@ console.log(selectedSpotId)
   };
 
   return (
-    <div>
+    <div className="user-container">
       <h1>Manage Spots for {user.firstName} {user.lastName}</h1>
       {Object.keys(spots).length === 0 && (
         <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>

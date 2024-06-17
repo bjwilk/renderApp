@@ -1,11 +1,37 @@
 .spot-card {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
+    /* border: solid black 1px; */
+    gap: 5px;
+    
+}
+.spot-mini {
+display: block;
+  border: solid black 1px;
+width: 300px;
+}
+
+.spot-name {
+  color: black;
+  padding-left: 10px;
+
+}
+
+.card-detail {
+  padding-left: 10px;
+
+}
+
+.rating {
+  padding-left: 10px;
+display: flex;
+padding-bottom: 3px;
 }
 
 .card-preview-image {
     width: auto;
     height: 100px;
+    padding-left: 10px;
 }
 
 .half-star {

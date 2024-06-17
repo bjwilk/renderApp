@@ -26,24 +26,37 @@ function SpotCard({ spot }) {
   }
 
   return (
-    <div className="spot-card">
-      <NavLink to={`/spots/${spot.id}`}>
-        <h3 className="spot-name">{spot.name}</h3>
-        <div>
-          {previewImage ? (
-            <img className="card-preview-image" src={previewImage} alt={spot.name} />
-          ) : (
-            "No image"
-          )}
-        </div>
-        <h5>{spot.city}, {spot.state}</h5>
-        <p>${spot.price} night</p>
-        <div className="rating">
-          {starIcons} 
-          <span>{spot.avgRating && <span>{spot.avgRating.toFixed(1)}</span>} {spot.avgRating ? "" : "New"}</span>
+    <>
+      <NavLink className="spot-card" to={`/spots/${spot.id}`}>
+        <div className="spot-mini">
+          <h3 className="spot-name">{spot.name}</h3>
+          <div>
+            {previewImage ? (
+              <img
+                className="card-preview-image"
+                src={previewImage}
+                alt={spot.name}
+              />
+            ) : (
+              "No image"
+            )}
+          </div>
+          <div className="card-detail">
+            <h5>
+              {spot.city}, {spot.state}
+            </h5>
+            <p>${spot.price} night</p>
+          </div>
+          <div className="rating">
+            {starIcons}
+            <span>
+              {spot.avgRating && <span>{spot.avgRating.toFixed(1)}</span>}{" "}
+              {spot.avgRating ? "" : "New"}
+            </span>
+          </div>
         </div>
       </NavLink>
-    </div>
+    </>
   );
 }
 
