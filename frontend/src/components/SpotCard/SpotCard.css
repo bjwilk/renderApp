@@ -1,50 +1,98 @@
-.spot-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    /* border: solid black 1px; */
-    gap: 5px;
-    
+/* SpotCard.css */
+
+.spot-card-container {
+  display: flex;
+  justify-content: center; /* Center the grid container */
+  padding: 20px;
 }
+
+.spot-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive columns */
+  gap: 20px; /* Increase the gap for better spacing */
+  text-decoration: none;
+  width: 100%;
+  max-width: 1200px; /* Set a max-width for the grid container */
+  padding: 10px; /* Add padding to the grid container */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+
 .spot-mini {
-display: block;
-  border: solid black 1px;
-width: 300px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box; /* Ensure padding and border are included in the width and height */
+}
+
+.spot-mini:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .spot-name {
-  color: black;
-  padding-left: 10px;
-
+  color: #333;
+  padding: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
 }
 
-.card-detail {
-  padding-left: 10px;
-
-}
-
-.rating {
-  padding-left: 10px;
-display: flex;
-padding-bottom: 3px;
+.image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
 }
 
 .card-preview-image {
-    width: auto;
-    height: 100px;
-    padding-left: 10px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-detail {
+  padding: 10px;
+  color: #666;
+}
+
+.card-detail h5 {
+  margin: 5px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.card-detail p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+.rating span {
+  margin-left: 5px;
+  font-size: 0.9rem;
+  color: #333;
 }
 
 .half-star {
-    position: relative;
-    width: 0.7em; 
-    overflow: hidden;
-  }
+  position: relative;
+  width: 0.7em; 
+  overflow: hidden;
+}
   
-  .half-star::before {
-    font-weight: 900;
-    color: gold;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 1em; 
-  }
+.half-star::before {
+  font-weight: 900;
+  color: gold;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1em; 
+}

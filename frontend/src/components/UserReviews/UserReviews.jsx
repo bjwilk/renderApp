@@ -86,8 +86,8 @@ function UsersReviews() {
         {Object.values(reviews).map((review) => (
           <div key={review.id}>
             <p>{review.review}</p>
-            <button onClick={() => handleDelete(review.id)}>Delete</button>
-            <button onClick={() => handleUpdate(review)}>Update</button>
+            <button className="update-button" onClick={() => handleDelete(review.id)}>Delete</button>
+            <button className="update-button" onClick={() => handleUpdate(review)}>Update</button>
           </div>
         ))}
       </div>

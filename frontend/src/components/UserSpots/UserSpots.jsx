@@ -80,9 +80,9 @@ console.log(selectedSpotId)
           <div key={spot.id}>
             <SpotCard spot={spot} />
             <NavLink to={`/spots/${spot.id}/edit`}>
-              <button>Update</button>
+              <button className="update-button">Update</button>
             </NavLink>
-            <button onClick={() => handleDeleteModal(spot.id)}>Delete</button>
+            <button className="update-button" onClick={() => handleDeleteModal(spot.id)}>Delete</button>
           </div>
         ))}
       </div>

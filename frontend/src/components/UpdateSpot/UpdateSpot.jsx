@@ -72,64 +72,64 @@ function UpdateSpot() {
   return (
     <>
       <h1>{spot ? "Update Spot" : "Create New Spot"}</h1>
-      <section className="new-form-holder">
+      <section className="form-container">
         <form onSubmit={handleSubmit}>
           <h2>Where's your place located?</h2>
           <p>
-            Guest will only get your exact address once they booked a
-            reservation.
+            Guests will only get your exact address once they book a reservation.
           </p>
           <input
             value={address}
             onChange={updateAddress}
             placeholder="Address"
+            className="input-field"
           />
-          {errors.address && <p className="errors">{errors.address}</p>}
-          <input value={city} onChange={updateCity} placeholder="City" />
-          {errors.city && <p className="errors">{errors.city}</p>}
-          <input value={state} onChange={updateState} placeholder="State" />
-          {errors.state && <p className="errors">{errors.state}</p>}
-          <input
-            value={country}
-            onChange={updateCountry}
-            placeholder="Country"
-          />
-          {errors.country && <p className="errors">{errors.country}</p>}
+          {errors.address && <p className="error-message">{errors.address}</p>}
+          <input value={city} onChange={updateCity} placeholder="City" className="input-field" />
+          {errors.city && <p className="error-message">{errors.city}</p>}
+          <input value={state} onChange={updateState} placeholder="State" className="input-field" />
+          {errors.state && <p className="error-message">{errors.state}</p>}
+          <input value={country} onChange={updateCountry} placeholder="Country" className="input-field" />
+          {errors.country && <p className="error-message">{errors.country}</p>}
           <h2>Describe your place to guests</h2>
           <p>
             Mention the best features of your space, any special amenities like
-            fst wifi or parking, and what you love about the neighborhood.
+            fast wifi or parking, and what you love about the neighborhood.
           </p>
           <textarea
             value={description}
             onChange={updateDescription}
             placeholder="Description"
+            className="textarea-field"
           />
-          {errors.description && <p className="errors">{errors.description}</p>}
+          {errors.description && <p className="error-message">{errors.description}</p>}
           <h2>Create a title for your spot</h2>
           <p>
             Catch guests' attention with a spot title that highlights what makes
-            your place special
+            your place special.
           </p>
-          <input value={name} onChange={updateName} placeholder="Name" />
-          {errors.name && <p className="errors">{errors.name}</p>}
-          <br></br>
+          <input value={name} onChange={updateName} placeholder="Name" className="input-field" />
+          {errors.name && <p className="error-message">{errors.name}</p>}
           <h2>Set a base price for your spot</h2>
           <p>
             Competitive pricing can help your listing stand out and rank higher
-            in search results
+            in search results.
           </p>
-          <span>$</span>{" "}
-          <input value={price} onChange={updatePrice} placeholder="Price" />
-          {errors.price && <p className="errors">{errors.price}</p>}
+          <div className="price-section">
+            <span>$</span>
+            <input value={price} onChange={updatePrice} placeholder="Price" className="input-field" />
+          </div>
+          {errors.price && <p className="error-message">{errors.price}</p>}
           <br></br>
           <br></br>
-          <button type="submit">
-            {spot ? "Update Spot" : "Create new Spot"}
-          </button>
-          <button type="button" onClick={() => navigate(-1)}>
-            Cancel
-          </button>
+          <div className="button-group">
+            <button type="submit" className="form-button">
+              {spot ? "Update Spot" : "Create new Spot"}
+            </button>
+            <button type="button" onClick={() => navigate(-1)} className="form-button cancel-button">
+              Cancel
+            </button>
+          </div>
         </form>
       </section>
     </>

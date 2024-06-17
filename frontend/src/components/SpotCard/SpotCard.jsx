@@ -26,11 +26,11 @@ function SpotCard({ spot }) {
   }
 
   return (
-    <>
+    <div className="spot-card-container">
       <NavLink className="spot-card" to={`/spots/${spot.id}`}>
         <div className="spot-mini">
           <h3 className="spot-name">{spot.name}</h3>
-          <div>
+          <div className="image-container">
             {previewImage ? (
               <img
                 className="card-preview-image"
@@ -56,7 +56,7 @@ function SpotCard({ spot }) {
           </div>
         </div>
       </NavLink>
-    </>
+    </div>
   );
 }
 
