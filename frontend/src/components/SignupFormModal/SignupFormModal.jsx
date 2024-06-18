@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import * as sessionActions from '../../store/session';
-import { useModal } from '../../context/Modal';
-import './SignupForm.css';
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import * as sessionActions from "../../store/session";
+import { useModal } from "../../context/Modal";
+import "./SignupForm.css";
 
 function SignupFormModal() {
   const dispatch = useDispatch();
@@ -15,13 +15,17 @@ function SignupFormModal() {
   const [errors, setErrors] = useState({});
   const { closeModal } = useModal();
 
-  let isButtonDisabled; 
-  if (username.length < 4 || password.length < 6){
-    isButtonDisabled = true
-  }else if(!email.length || !firstName.length || !lastName.length || !confirmPassword.length){
-    isButtonDisabled = true
-  };
-
+  let isButtonDisabled;
+  if (username.length < 4 || password.length < 6) {
+    isButtonDisabled = true;
+  } else if (
+    !email.length ||
+    !firstName.length ||
+    !lastName.length ||
+    !confirmPassword.length
+  ) {
+    isButtonDisabled = true;
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,7 +37,7 @@ function SignupFormModal() {
           username,
           firstName,
           lastName,
-          password
+          password,
         })
       )
         .then(closeModal)
@@ -45,15 +49,16 @@ function SignupFormModal() {
         });
     }
     return setErrors({
-      confirmPassword: "Confirm Password field must be the same as the Password field"
+      confirmPassword:
+        "Confirm Password field must be the same as the Password field",
     });
   };
 
   return (
     <>
       <h1>Sign Up</h1>
-      <form className='signup-form' onSubmit={handleSubmit}>
-        <label className='input-field'>
+      <form className="signup-form" onSubmit={handleSubmit}>
+        <label className="input-field">
           Email
           <input
             type="text"
@@ -63,7 +68,7 @@ function SignupFormModal() {
           />
         </label>
         {errors.email && <p className="error-message">{errors.email}</p>}
-        <label className='input-field'>
+        <label className="input-field">
           Username
           <input
             type="text"
@@ -73,7 +78,7 @@ function SignupFormModal() {
           />
         </label>
         {errors.username && <p className="error-message">{errors.username}</p>}
-        <label className='input-field'>
+        <label className="input-field">
           First Name
           <input
             type="text"
@@ -82,8 +87,10 @@ function SignupFormModal() {
             required
           />
         </label>
-        {errors.firstName && <p className="error-message">{errors.firstName}</p>}
-        <label className='input-field'>
+        {errors.firstName && (
+          <p className="error-message">{errors.firstName}</p>
+        )}
+        <label className="input-field">
           Last Name
           <input
             type="text"
@@ -93,7 +100,7 @@ function SignupFormModal() {
           />
         </label>
         {errors.lastName && <p className="error-message">{errors.lastName}</p>}
-        <label className='input-field'>
+        <label className="input-field">
           Password
           <input
             type="password"
@@ -103,7 +110,7 @@ function SignupFormModal() {
           />
         </label>
         {errors.password && <p className="error-message">{errors.password}</p>}
-        <label className='input-field'>
+        <label className="input-field">
           Confirm Password
           <input
             type="password"
@@ -115,7 +122,13 @@ function SignupFormModal() {
         {errors.confirmPassword && (
           <p className="error-message">{errors.confirmPassword}</p>
         )}
-        <button className='form-button' disabled={isButtonDisabled} type="submit">Sign Up</button>
+        <button
+          className="form-button"
+          disabled={isButtonDisabled}
+          type="submit"
+        >
+          Sign Up
+        </button>
       </form>
     </>
   );

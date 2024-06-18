@@ -6,7 +6,7 @@ import { useModal } from "../../context/Modal";
 import ConfirmDeleteSpotModal from "../ConfirmDeleteModal/ConfirmDeleteSpotModal";
 
 import SpotCard from "../SpotCard/SpotCard";
-import './UserSpots.css'
+import "./UserSpots.css";
 
 function UserSpots() {
   const dispatch = useDispatch();
@@ -14,11 +14,11 @@ function UserSpots() {
   const ulRef = useRef();
 
   const spots = useSelector((state) => state.spots);
-  const user = useSelector(state => state.session.user)
+  const user = useSelector((state) => state.session.user);
   const [showModal, setShowModal] = useState(false);
   const [selectedSpotId, setSelectedSpotId] = useState(null);
 
-console.log(selectedSpotId)
+  console.log(selectedSpotId);
 
   useEffect(() => {
     dispatch(fetchUserSpots());
@@ -39,7 +39,6 @@ console.log(selectedSpotId)
   }, [showModal]);
 
   const handleDelete = (spotId) => {
-
     dispatch(removeSpot(spotId));
   };
 
@@ -71,18 +70,29 @@ console.log(selectedSpotId)
 
   return (
     <div className="user-container">
-      <h1>Manage Spots for {user.firstName} {user.lastName}</h1>
+      <h1>
+        Manage Spots for {user.firstName} {user.lastName}
+      </h1>
       {Object.keys(spots).length === 0 && (
-        <div><NavLink to={"/spots/new"} >Create a Spot</NavLink></div>
+        <div>
+          <NavLink to={"/spots/new"}>Create a Spot</NavLink>
+        </div>
       )}
       <div className="spot-card">
         {Object.values(spots).map((spot) => (
           <div key={spot.id}>
             <SpotCard spot={spot} />
-            <NavLink to={`/spots/${spot.id}/edit`}>
-              <button className="update-button">Update</button>
-            </NavLink>
-            <button className="update-button" onClick={() => handleDeleteModal(spot.id)}>Delete</button>
+            <div className="button-group-update">
+              <NavLink to={`/spots/${spot.id}/edit`}>
+                <button className="update-button">Update</button>
+              </NavLink>
+              <button
+                className="update-button"
+                onClick={() => handleDeleteModal(spot.id)}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         ))}
       </div>

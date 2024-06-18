@@ -2,7 +2,11 @@ import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useModal } from "../../context/Modal";
 import StarRating from "../CreateReview/StarRating";
-import { fetchUserReviews, fetchRemoveReview, fetchUpdateReview } from "../../store/reviews";
+import {
+  fetchUserReviews,
+  fetchRemoveReview,
+  fetchUpdateReview,
+} from "../../store/reviews";
 
 function UsersReviews() {
   const dispatch = useDispatch();
@@ -12,9 +16,8 @@ function UsersReviews() {
   const reviews = useSelector((state) => state.reviews);
   const user = useSelector((state) => state.session.user);
 
-
   const [showModal, setShowModal] = useState(false);
-  const [id, setId] = useState(null)
+  const [id, setId] = useState(null);
   const [review, setReview] = useState("");
   const [stars, setStars] = useState(0);
   const [errors, setErrors] = useState({});
@@ -42,12 +45,11 @@ function UsersReviews() {
   };
 
   const handleUpdate = (review) => {
-    setId(review.id)
+    setId(review.id);
     setReview(review.review);
     setStars(review.stars);
     setShowModal(true);
   };
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ function UsersReviews() {
         reviewId: review.reviewId,
         userId: user.id,
         review,
-        stars
+        stars,
       })
     )
       .then(() => {
@@ -66,13 +68,12 @@ function UsersReviews() {
         window.location.reload();
       })
       .catch(async (res) => {
-        console.log(res)
+        console.log(res);
         const data = await res.json();
         if (data?.errors) {
           setErrors(data.errors);
         }
       });
-    
   };
 
   if (!reviews || Object.keys(reviews).length === 0) {
@@ -86,8 +87,18 @@ function UsersReviews() {
         {Object.values(reviews).map((review) => (
           <div key={review.id}>
             <p>{review.review}</p>
-            <button className="update-button" onClick={() => handleDelete(review.id)}>Delete</button>
-            <button className="update-button" onClick={() => handleUpdate(review)}>Update</button>
+            <button
+              className="update-button"
+              onClick={() => handleDelete(review.id)}
+            >
+              Delete
+            </button>
+            <button
+              className="update-button"
+              onClick={() => handleUpdate(review)}
+            >
+              Update
+            </button>
           </div>
         ))}
       </div>

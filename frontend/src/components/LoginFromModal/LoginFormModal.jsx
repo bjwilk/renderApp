@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import * as sessionActions from '../../store/session';
-import { useDispatch } from 'react-redux';
-import { useModal } from '../../context/Modal';
-import './LoginForm.css';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import * as sessionActions from "../../store/session";
+import { useDispatch } from "react-redux";
+import { useModal } from "../../context/Modal";
+import "./LoginForm.css";
+import { useNavigate } from "react-router-dom";
 
 function LoginFormModal() {
   const dispatch = useDispatch();
@@ -38,7 +38,9 @@ function LoginFormModal() {
     setErrors({});
 
     try {
-      await dispatch(sessionActions.login({ credential: 'FakerUser1', password: 'password' }));
+      await dispatch(
+        sessionActions.login({ credential: "FakerUser1", password: "password" })
+      );
       closeModal();
       navigate("/");
     } catch (err) {
@@ -50,8 +52,8 @@ function LoginFormModal() {
   return (
     <>
       <h1>Log In</h1>
-      <form className='form-container' onSubmit={handleSubmit}>
-        <label className='input-field'>
+      <form className="form-container" onSubmit={handleSubmit}>
+        <label className="input-field">
           Username or Email
           <input
             type="text"
@@ -60,7 +62,7 @@ function LoginFormModal() {
             required
           />
         </label>
-        <label className='input-field'>
+        <label className="input-field">
           Password
           <input
             type="password"
@@ -69,26 +71,40 @@ function LoginFormModal() {
             required
           />
         </label>
-       
-<div className='error-container'>
-        {errors.credential && errors.password && (
-          <>
-            <p className='error-message'>Wrong Username or Email: {errors.credential}</p>
-            <p className='error-message'>Wrong Password: {errors.password}</p>
-          </>
-        )}
-        {errors.credential && !errors.password && (
-          <p className='error-message'>Wrong Username or Email: {errors.credential}</p>
-        )}
-        {!errors.credential && errors.password && (
-          <p className='error-message'>The provided credentials were invalid: {errors.password}</p>
-        )}
-</div>
-     <br></br>
-<div className='button-group'>
-        <button className='form-button' disabled={isButtonDisabled} type="submit">Log In</button>
+
+        <div className="error-container">
+          {errors.credential && errors.password && (
+            <>
+              <p className="error-message">
+                Wrong Username or Email: {errors.credential}
+              </p>
+              <p className="error-message">Wrong Password: {errors.password}</p>
+            </>
+          )}
+          {errors.credential && !errors.password && (
+            <p className="error-message">
+              Wrong Username or Email: {errors.credential}
+            </p>
+          )}
+          {!errors.credential && errors.password && (
+            <p className="error-message">
+              The provided credentials were invalid: {errors.password}
+            </p>
+          )}
+        </div>
         <br></br>
-        <button className='form-button' onClick={handleDemoLogin} >Demo User</button>
+        <div className="button-group">
+          <button
+            className="form-button"
+            disabled={isButtonDisabled}
+            type="submit"
+          >
+            Log In
+          </button>
+          <br></br>
+          <button className="form-button" onClick={handleDemoLogin}>
+            Demo User
+          </button>
         </div>
       </form>
     </>
