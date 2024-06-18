@@ -50,8 +50,8 @@ function LoginFormModal() {
   return (
     <>
       <h1>Log In</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
+      <form className='form-container' onSubmit={handleSubmit}>
+        <label className='input-field'>
           Username or Email
           <input
             type="text"
@@ -60,7 +60,7 @@ function LoginFormModal() {
             required
           />
         </label>
-        <label>
+        <label className='input-field'>
           Password
           <input
             type="password"
@@ -69,22 +69,27 @@ function LoginFormModal() {
             required
           />
         </label>
+       
+<div className='error-container'>
         {errors.credential && errors.password && (
           <>
-            <p className='errors'>Wrong Username or Email: {errors.credential}</p>
-            <p className='errors'>Wrong Password: {errors.password}</p>
+            <p className='error-message'>Wrong Username or Email: {errors.credential}</p>
+            <p className='error-message'>Wrong Password: {errors.password}</p>
           </>
         )}
         {errors.credential && !errors.password && (
-          <p className='errors'>Wrong Username or Email: {errors.credential}</p>
+          <p className='error-message'>Wrong Username or Email: {errors.credential}</p>
         )}
         {!errors.credential && errors.password && (
-          <p className='errors'>The provided credentials were invalid: {errors.password}</p>
+          <p className='error-message'>The provided credentials were invalid: {errors.password}</p>
         )}
+</div>
      <br></br>
-        <button disabled={isButtonDisabled} type="submit">Log In</button>
+<div className='button-group'>
+        <button className='form-button' disabled={isButtonDisabled} type="submit">Log In</button>
         <br></br>
-        <button onClick={handleDemoLogin} className="demo-button">Demo User</button>
+        <button className='form-button' onClick={handleDemoLogin} >Demo User</button>
+        </div>
       </form>
     </>
   );
